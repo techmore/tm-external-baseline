@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>External Domain Baseline</title>
+  <style>
+    body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f7f6f0; color: #3d3926; }
+    main { max-width: 1180px; margin: 0 auto; padding: 42px 24px; }
+    h1 { font-size: 42px; margin: 0 0 10px; }
+    h2 { margin-top: 34px; }
+    .lede { color: #5f5532; margin-bottom: 28px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
+    .stat, table { background: rgba(255,255,255,.72); border: 1px solid rgba(95,85,50,.16); border-radius: 8px; }
+    .stat { padding: 18px; }
+    .label { color: #7d703c; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; }
+    .value { font-size: 30px; font-weight: 800; margin-top: 6px; }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; }
+    th, td { padding: 13px 14px; border-bottom: 1px solid rgba(95,85,50,.14); text-align: left; vertical-align: top; }
+    th { color: #5f5532; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; background: rgba(238,236,216,.68); }
+    small { color: #5f5532; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>External Domain Baseline</h1>
+    <p class="lede">Generated 2026-05-01T02:51:12Z. Public-facing DNS, website, vendor, and email exposure baseline.</p>
+    <p><strong>This is your baseline. Future scans will highlight changes.</strong></p>
+    <section class="stats">
+      <div class="stat"><div class="label">Domains</div><div class="value">1</div></div>
+      <div class="stat"><div class="label">Security Score</div><div class="value">0%</div></div>
+      <div class="stat"><div class="label">DNS Changes</div><div class="value">0</div></div>
+      <div class="stat"><div class="label">Vendors</div><div class="value">7</div></div>
+    </section>
+    <h2>Customer Scorecard</h2>
+    <table><thead><tr><th>Area</th><th>Status</th><th>Summary</th></tr></thead><tbody><tr><td>DNS health</td><td>Pass</td><td>DNS records are monitored for additions, removals, and sensitive changes.</td></tr><tr><td>Website security headers</td><td>Action Needed</td><td>Browser security headers and exposed hosting headers are checked.</td></tr><tr><td>Email security</td><td>Action Needed</td><td>SPF, DMARC, DKIM signals, MX provider, and spoofing risk are reviewed.</td></tr><tr><td>Vendor exposure</td><td>Watch</td><td>Third-party hosts are categorized and unknown vendors are flagged.</td></tr><tr><td>External vulnerability scan</td><td>Pass</td><td>Nikto findings are promoted into customer-readable findings.</td></tr></tbody></table>
+    <h2>Plain-English Findings</h2>
+    <table><thead><tr><th>Severity</th><th>Finding</th><th>Impact</th><th>Recommended Fix</th><th>Owner</th></tr></thead><tbody><tr><td>High</td><td>CSP header is missing<br><small>cybersecuritypilot.org does not publish the content-security-policy header.</small></td><td>Missing CSP can reduce browser-side protection for visitors.</td><td>Add a content-security-policy header at the web server, CDN, or hosting layer.</td><td>Website</td></tr><tr><td>High</td><td>DMARC record is missing<br><small>cybersecuritypilot.org does not publish a DMARC policy.</small></td><td>Mailbox providers get less guidance on how to handle spoofed mail.</td><td>Publish a _dmarc TXT record, starting with p=none for monitoring and moving toward quarantine or reject.</td><td>Email</td></tr><tr><td>High</td><td>Email spoofing risk is high<br><small>cybersecuritypilot.org is missing both SPF and DMARC.</small></td><td>Customers, staff, or vendors may receive convincing spoofed messages that appear to come from this domain.</td><td>Add SPF and DMARC records, then validate them with a follow-up scan.</td><td>Email</td></tr><tr><td>High</td><td>HSTS header is missing<br><small>cybersecuritypilot.org does not publish the strict-transport-security header.</small></td><td>Missing HSTS can reduce browser-side protection for visitors.</td><td>Add a strict-transport-security header at the web server, CDN, or hosting layer.</td><td>Website</td></tr><tr><td>High</td><td>SPF record is missing<br><small>cybersecuritypilot.org does not publish an SPF record.</small></td><td>Attackers may have an easier time spoofing mail from this domain.</td><td>Publish a TXT record beginning with v=spf1 that includes authorized mail senders.</td><td>Email</td></tr><tr><td>Medium</td><td>Referrer-Policy header is missing<br><small>cybersecuritypilot.org does not publish the referrer-policy header.</small></td><td>Missing Referrer-Policy can reduce browser-side protection for visitors.</td><td>Add a referrer-policy header at the web server, CDN, or hosting layer.</td><td>Website</td></tr><tr><td>Medium</td><td>Unknown third-party vendor observed<br><small>cybersecuritypilot.org loads content from cdn.tailwindcss.com, which is not categorized yet.</small></td><td>Unreviewed third-party scripts or assets can introduce availability, privacy, or security risk.</td><td>Validate the vendor purpose and categorize it as approved or remove it if unnecessary.</td><td>Vendor</td></tr><tr><td>Medium</td><td>Unknown third-party vendor observed<br><small>cybersecuritypilot.org loads content from techmore.github.io, which is not categorized yet.</small></td><td>Unreviewed third-party scripts or assets can introduce availability, privacy, or security risk.</td><td>Validate the vendor purpose and categorize it as approved or remove it if unnecessary.</td><td>Vendor</td></tr><tr><td>Medium</td><td>Unknown third-party vendor observed<br><small>cybersecuritypilot.org loads content from techmore.github.io, which is not categorized yet.</small></td><td>Unreviewed third-party scripts or assets can introduce availability, privacy, or security risk.</td><td>Validate the vendor purpose and categorize it as approved or remove it if unnecessary.</td><td>Vendor</td></tr><tr><td>Medium</td><td>XCTO header is missing<br><small>cybersecuritypilot.org does not publish the x-content-type-options header.</small></td><td>Missing XCTO can reduce browser-side protection for visitors.</td><td>Add a x-content-type-options header at the web server, CDN, or hosting layer.</td><td>Website</td></tr><tr><td>Medium</td><td>XFO header is missing<br><small>cybersecuritypilot.org does not publish the x-frame-options header.</small></td><td>Missing XFO can reduce browser-side protection for visitors.</td><td>Add a x-frame-options header at the web server, CDN, or hosting layer.</td><td>Website</td></tr><tr><td>Low</td><td>server header is exposed<br><small>cybersecuritypilot.org exposes server: GitHub.com.</small></td><td>Technology disclosure can help attackers fingerprint hosting or application components.</td><td>Review whether the server header is needed and remove or reduce it when possible.</td><td>Hosting</td></tr><tr><td>Low</td><td>via header is exposed<br><small>cybersecuritypilot.org exposes via: 1.1 varnish.</small></td><td>Technology disclosure can help attackers fingerprint hosting or application components.</td><td>Review whether the via header is needed and remove or reduce it when possible.</td><td>Hosting</td></tr></tbody></table>
+    <h2>Remediation Checklist</h2>
+    <table><thead><tr><th>Severity</th><th>Owner</th><th>Effort</th><th>Task</th></tr></thead><tbody><tr><td>High</td><td>Website</td><td>Low</td><td>Add a content-security-policy header at the web server, CDN, or hosting layer.</td></tr><tr><td>High</td><td>Email</td><td>Medium</td><td>Publish a _dmarc TXT record, starting with p=none for monitoring and moving toward quarantine or reject.</td></tr><tr><td>High</td><td>Email</td><td>Medium</td><td>Add SPF and DMARC records, then validate them with a follow-up scan.</td></tr><tr><td>High</td><td>Website</td><td>Low</td><td>Add a strict-transport-security header at the web server, CDN, or hosting layer.</td></tr><tr><td>High</td><td>Email</td><td>Medium</td><td>Publish a TXT record beginning with v=spf1 that includes authorized mail senders.</td></tr><tr><td>Medium</td><td>Website</td><td>Low</td><td>Add a referrer-policy header at the web server, CDN, or hosting layer.</td></tr><tr><td>Medium</td><td>Vendor</td><td>Low</td><td>Validate the vendor purpose and categorize it as approved or remove it if unnecessary.</td></tr><tr><td>Medium</td><td>Vendor</td><td>Low</td><td>Validate the vendor purpose and categorize it as approved or remove it if unnecessary.</td></tr><tr><td>Medium</td><td>Vendor</td><td>Low</td><td>Validate the vendor purpose and categorize it as approved or remove it if unnecessary.</td></tr><tr><td>Medium</td><td>Website</td><td>Low</td><td>Add a x-content-type-options header at the web server, CDN, or hosting layer.</td></tr><tr><td>Medium</td><td>Website</td><td>Low</td><td>Add a x-frame-options header at the web server, CDN, or hosting layer.</td></tr><tr><td>Low</td><td>Hosting</td><td>Low</td><td>Review whether the server header is needed and remove or reduce it when possible.</td></tr><tr><td>Low</td><td>Hosting</td><td>Low</td><td>Review whether the via header is needed and remove or reduce it when possible.</td></tr></tbody></table>
+    <h2>Domain Evidence</h2>
+    <table>
+      <thead><tr><th>Domain</th><th>Status</th><th>DNS Changes</th><th>Vendors</th><th>Public Emails</th><th>MX Records</th></tr></thead>
+      <tbody><tr><td>cybersecuritypilot.org</td><td>200</td><td>4</td><td>7</td><td>0</td><td>1 smtp.google.com.</td></tr></tbody>
+    </table>
+  </main>
+</body>
+</html>

@@ -14,15 +14,19 @@ to a timestamped HTML report for archival review.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
+import os
 import re
+import smtplib
 import socket
 import ssl
 import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from email.message import EmailMessage
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -56,10 +60,15 @@ VENDOR_PATTERNS = {
     "Analytics": ("google-analytics", "googletagmanager", "gtag", "analytics", "segment", "mixpanel"),
     "Advertising": ("doubleclick", "adsystem", "adroll", "adsense"),
     "Social": ("facebook", "twitter", "x.com", "linkedin", "instagram", "tiktok"),
+    "Fonts": ("fonts.googleapis.com", "fonts.gstatic.com", "typekit", "fontawesome"),
+    "Payment": ("stripe", "paypal", "squareup", "checkout", "authorize.net", "braintree"),
+    "Marketing": ("hubspot", "mailchimp", "constantcontact", "marketo", "pardot", "intercom"),
     "CDN": ("cloudflare", "amazonaws", "akamai", "fastly", "jsdelivr", "unpkg", "cloudfront"),
     "Libraries": (".js", ".css"),
 }
 COMMON_MAILBOXES = ("admin", "contact", "hello", "info", "security", "support", "webmaster")
+COMMON_DKIM_SELECTORS = ("google", "selector1", "selector2", "default", "k1", "mail", "s1", "s2")
+SEVERITY_RANK = {"Critical": 5, "High": 4, "Medium": 3, "Low": 2, "Info": 1}
 
 
 @dataclass
@@ -126,6 +135,13 @@ def collect_dns(domain: str) -> dict[str, list[str]]:
     return records
 
 
+def resolve_txt(name: str) -> list[str]:
+    code, output = run_command(["dig", "+short", "TXT", name], timeout=10)
+    if code != 0 or not output:
+        return []
+    return sorted({line.strip().replace('" "', "") for line in output.splitlines() if line.strip()})
+
+
 def collect_ssl(domain: str) -> dict[str, Any]:
     try:
         context = ssl.create_default_context()
@@ -189,7 +205,7 @@ def categorize_vendor(url: str) -> str:
     for category, patterns in VENDOR_PATTERNS.items():
         if any(pattern in lower for pattern in patterns):
             return category
-    return "Other"
+    return "Unknown"
 
 
 def collect_vendors(domain: str, urls: list[str]) -> list[dict[str, str]]:
@@ -199,7 +215,15 @@ def collect_vendors(domain: str, urls: list[str]) -> list[dict[str, str]]:
         host = parsed.hostname or ""
         if host == domain or host.endswith(f".{domain}"):
             continue
-        vendors.append({"name": host, "type": categorize_vendor(url), "url": url})
+        category = categorize_vendor(url)
+        vendors.append({
+            "name": host,
+            "type": category,
+            "category": category,
+            "riskLabel": "Watch" if category == "Unknown" else "Observed",
+            "reason": f"Matched {category.lower()} pattern" if category != "Unknown" else "No known category pattern matched",
+            "url": url,
+        })
     unique = {(vendor["name"], vendor["type"], vendor["url"]): vendor for vendor in vendors}
     return sorted(unique.values(), key=lambda item: (item["type"], item["name"], item["url"]))
 
@@ -255,12 +279,57 @@ def enumerate_emails(domain: str, body: str, mx_records: list[str]) -> dict[str,
     email_pattern = re.compile(rf"\b[A-Z0-9._%+-]+@{re.escape(domain)}\b", re.IGNORECASE)
     discovered = sorted({match.lower() for match in email_pattern.findall(body)})
     aliases = [f"{mailbox}@{domain}" for mailbox in COMMON_MAILBOXES]
+    spf_records = [value for value in resolve_txt(domain) if "v=spf1" in value.lower()]
+    dmarc_records = [value for value in resolve_txt(f"_dmarc.{domain}") if "v=dmarc1" in value.lower()]
+    dkim_records = []
+    for selector in COMMON_DKIM_SELECTORS:
+        records = resolve_txt(f"{selector}._domainkey.{domain}")
+        if records:
+            dkim_records.append({"selector": selector, "records": records})
+    mx_provider = identify_mx_provider(mx_records)
+    dmarc_policy = "missing"
+    if dmarc_records:
+        match = re.search(r"\bp=(none|quarantine|reject)\b", " ".join(dmarc_records), re.IGNORECASE)
+        dmarc_policy = match.group(1).lower() if match else "present"
+    spoofing_risk = "Low"
+    if not spf_records and not dmarc_records:
+        spoofing_risk = "High"
+    elif not dmarc_records or dmarc_policy == "none":
+        spoofing_risk = "Medium"
     return {
         "mxPresent": bool(mx_records),
+        "mxRecords": mx_records,
+        "mxProvider": mx_provider,
+        "spf": {"present": bool(spf_records), "records": spf_records, "valid": bool(spf_records)},
+        "dmarc": {"present": bool(dmarc_records), "records": dmarc_records, "policy": dmarc_policy},
+        "dkim": {"selectorsChecked": list(COMMON_DKIM_SELECTORS), "records": dkim_records, "present": bool(dkim_records)},
+        "spoofingRisk": spoofing_risk,
         "discovered": discovered,
         "commonAliases": aliases,
         "totalPublicEmails": len(discovered),
     }
+
+
+def identify_mx_provider(mx_records: list[str]) -> str:
+    joined = " ".join(mx_records).lower()
+    providers = {
+        "Google Workspace": ("google.com", "googlemail.com", "smtp.google.com"),
+        "Microsoft 365": ("protection.outlook.com", "outlook.com"),
+        "Proofpoint": ("pphosted.com",),
+        "Mimecast": ("mimecast.com",),
+        "Fastmail": ("messagingengine.com",),
+        "Zoho": ("zoho.com",),
+        "Hover": ("hover.com",),
+    }
+    for provider, patterns in providers.items():
+        if any(pattern in joined for pattern in patterns):
+            return provider
+    return "Unknown" if mx_records else "No MX"
+
+
+def stable_id(*parts: Any) -> str:
+    text = "|".join(str(part) for part in parts)
+    return hashlib.sha1(text.encode("utf-8")).hexdigest()[:12]
 
 
 def build_report_sections(domain: str, data: dict[str, Any]) -> list[dict[str, Any]]:
@@ -291,7 +360,7 @@ def build_report_sections(domain: str, data: dict[str, Any]) -> list[dict[str, A
                     for check in website.get("securityAnalysis", {}).get("checks", [])
                 ],
                 *[
-                    {"label": vendor["type"], "value": f"{vendor['name']} - {vendor['url']}"}
+                    {"label": vendor["category"], "value": f"{vendor['name']} - {vendor['url']}"}
                     for vendor in website.get("vendors", [])
                 ],
             ],
@@ -310,6 +379,10 @@ def build_report_sections(domain: str, data: dict[str, Any]) -> list[dict[str, A
             "title": "Domain Email Enumeration",
             "summary": f"{email['totalPublicEmails']} public emails; MX {'present' if email['mxPresent'] else 'missing'}",
             "items": [
+                {"label": "MX provider", "value": email["mxProvider"]},
+                {"label": "SPF", "value": "Present" if email["spf"]["present"] else "Missing"},
+                {"label": "DMARC", "value": email["dmarc"]["policy"]},
+                {"label": "Spoofing risk", "value": email["spoofingRisk"]},
                 *[{"label": "Public email", "value": value} for value in email["discovered"]],
                 *[{"label": "Common alias", "value": value} for value in email["commonAliases"]],
             ],
@@ -323,23 +396,106 @@ def diff_records(previous: dict[str, Any], current: dict[str, Any]) -> list[dict
         previous_domain = previous.get(domain, {})
         for record_type, values in current_domain.get("dns", {}).items():
             old_values = previous_domain.get("dns", {}).get(record_type, [])
-            if values != old_values:
+            added = sorted(set(values) - set(old_values))
+            removed = sorted(set(old_values) - set(values))
+            if added or removed:
                 changes.append({
+                    "id": stable_id(domain, "dns", record_type, json.dumps(added), json.dumps(removed)),
                     "domain": domain,
                     "category": "DNS",
                     "type": record_type,
+                    "changeType": "dns_record_changed",
                     "old": old_values,
                     "new": values,
+                    "before": old_values,
+                    "after": values,
+                    "added": added,
+                    "removed": removed,
+                    "severity": "High" if record_type in {"MX", "NS", "TXT"} else "Medium",
+                    "owner": "DNS",
                 })
         old_status = previous_domain.get("website", {}).get("status")
         new_status = current_domain.get("website", {}).get("status")
         if old_status != new_status:
             changes.append({
+                "id": stable_id(domain, "status", old_status, new_status),
                 "domain": domain,
                 "category": "Website",
                 "type": "HTTP status",
+                "changeType": "website_status_changed",
                 "old": old_status,
                 "new": new_status,
+                "before": old_status,
+                "after": new_status,
+                "severity": "Medium",
+                "owner": "Website",
+            })
+        old_headers = previous_domain.get("website", {}).get("securityHeaders", {})
+        new_headers = current_domain.get("website", {}).get("securityHeaders", {})
+        for header, old_value in old_headers.items():
+            if old_value and not new_headers.get(header):
+                changes.append({
+                    "id": stable_id(domain, "header_removed", header),
+                    "domain": domain,
+                    "category": "Website",
+                    "type": header,
+                    "changeType": "header_disappeared",
+                    "before": old_value,
+                    "after": None,
+                    "severity": "High",
+                    "owner": "Website",
+                })
+        old_vendors = {vendor.get("name") for vendor in previous_domain.get("website", {}).get("vendors", [])}
+        new_vendors = {vendor.get("name") for vendor in current_domain.get("website", {}).get("vendors", [])}
+        for vendor in sorted(new_vendors - old_vendors):
+            changes.append({
+                "id": stable_id(domain, "vendor_added", vendor),
+                "domain": domain,
+                "category": "Vendor",
+                "type": "New vendor",
+                "changeType": "new_vendor_added",
+                "before": None,
+                "after": vendor,
+                "severity": "Medium",
+                "owner": "Vendor",
+            })
+        for vendor in sorted(old_vendors - new_vendors):
+            changes.append({
+                "id": stable_id(domain, "vendor_removed", vendor),
+                "domain": domain,
+                "category": "Vendor",
+                "type": "Vendor removed",
+                "changeType": "vendor_removed",
+                "before": vendor,
+                "after": None,
+                "severity": "Low",
+                "owner": "Vendor",
+            })
+        old_nikto = set(previous_domain.get("website", {}).get("nikto", {}).get("findings", []))
+        new_nikto = set(current_domain.get("website", {}).get("nikto", {}).get("findings", []))
+        for finding in sorted(new_nikto - old_nikto):
+            changes.append({
+                "id": stable_id(domain, "nikto_added", finding),
+                "domain": domain,
+                "category": "Nikto",
+                "type": "Finding appeared",
+                "changeType": "nikto_finding_appeared",
+                "before": None,
+                "after": finding,
+                "severity": "High",
+                "owner": "Website",
+            })
+        for finding in sorted(old_nikto - new_nikto):
+            changes.append({
+                "id": stable_id(domain, "nikto_resolved", finding),
+                "domain": domain,
+                "category": "Nikto",
+                "type": "Finding resolved",
+                "changeType": "nikto_finding_resolved",
+                "before": finding,
+                "after": None,
+                "severity": "Info",
+                "owner": "Website",
             })
     return changes
 
@@ -355,8 +511,193 @@ def save_history(domains: dict[str, Any]) -> None:
     HISTORY_PATH.write_text(json.dumps({"timestamp": utc_now(), "domains": domains}, indent=2))
 
 
+def make_finding(domain: str, title: str, summary: str, impact: str, recommendation: str,
+                 severity: str, owner: str, effort: str, confidence: str, evidence: Any) -> dict[str, Any]:
+    return {
+        "id": stable_id(domain, title, json.dumps(evidence, sort_keys=True, default=str)),
+        "domain": domain,
+        "title": title,
+        "summary": summary,
+        "impact": impact,
+        "recommendation": recommendation,
+        "severity": severity,
+        "owner": owner,
+        "effort": effort,
+        "confidence": confidence,
+        "evidence": evidence,
+    }
+
+
+def generate_findings(domains: dict[str, Any], changes: list[dict[str, Any]], is_first_run: bool) -> list[dict[str, Any]]:
+    findings = []
+    for domain, data in domains.items():
+        website = data["website"]
+        email = data["email"]
+        for missing in website.get("securityAnalysis", {}).get("missing", []):
+            severity = "High" if missing["name"] in {"HSTS", "CSP"} else "Medium"
+            findings.append(make_finding(
+                domain,
+                f"{missing['name']} header is missing",
+                f"{domain} does not publish the {missing['header']} header.",
+                f"Missing {missing['name']} can reduce browser-side protection for visitors.",
+                f"Add a {missing['header']} header at the web server, CDN, or hosting layer.",
+                severity,
+                "Website",
+                "Low",
+                "High",
+                missing,
+            ))
+        for exposed in website.get("securityAnalysis", {}).get("exposedHeaders", []):
+            findings.append(make_finding(
+                domain,
+                f"{exposed['header']} header is exposed",
+                f"{domain} exposes {exposed['header']}: {exposed['value']}.",
+                "Technology disclosure can help attackers fingerprint hosting or application components.",
+                f"Review whether the {exposed['header']} header is needed and remove or reduce it when possible.",
+                "Low",
+                "Hosting",
+                "Low",
+                "Medium",
+                exposed,
+            ))
+        if not email["spf"]["present"]:
+            findings.append(make_finding(
+                domain,
+                "SPF record is missing",
+                f"{domain} does not publish an SPF record.",
+                "Attackers may have an easier time spoofing mail from this domain.",
+                "Publish a TXT record beginning with v=spf1 that includes authorized mail senders.",
+                "High" if email["mxPresent"] else "Medium",
+                "Email",
+                "Medium",
+                "High",
+                email["mxRecords"],
+            ))
+        if not email["dmarc"]["present"]:
+            findings.append(make_finding(
+                domain,
+                "DMARC record is missing",
+                f"{domain} does not publish a DMARC policy.",
+                "Mailbox providers get less guidance on how to handle spoofed mail.",
+                "Publish a _dmarc TXT record, starting with p=none for monitoring and moving toward quarantine or reject.",
+                "High" if email["mxPresent"] else "Medium",
+                "Email",
+                "Medium",
+                "High",
+                email["dmarc"],
+            ))
+        elif email["dmarc"]["policy"] == "none":
+            findings.append(make_finding(
+                domain,
+                "DMARC policy is monitoring only",
+                f"{domain} has DMARC enabled with p=none.",
+                "Spoofed messages may still be delivered because DMARC is not enforcing quarantine or rejection.",
+                "After reviewing reports, move DMARC toward p=quarantine or p=reject.",
+                "Medium",
+                "Email",
+                "Medium",
+                "High",
+                email["dmarc"],
+            ))
+        if email["spoofingRisk"] == "High":
+            findings.append(make_finding(
+                domain,
+                "Email spoofing risk is high",
+                f"{domain} is missing both SPF and DMARC.",
+                "Customers, staff, or vendors may receive convincing spoofed messages that appear to come from this domain.",
+                "Add SPF and DMARC records, then validate them with a follow-up scan.",
+                "High",
+                "Email",
+                "Medium",
+                "High",
+                email,
+            ))
+        for vendor in website.get("vendors", []):
+            if vendor.get("category") == "Unknown":
+                findings.append(make_finding(
+                    domain,
+                    "Unknown third-party vendor observed",
+                    f"{domain} loads content from {vendor['name']}, which is not categorized yet.",
+                    "Unreviewed third-party scripts or assets can introduce availability, privacy, or security risk.",
+                    "Validate the vendor purpose and categorize it as approved or remove it if unnecessary.",
+                    "Medium",
+                    "Vendor",
+                    "Low",
+                    "Medium",
+                    vendor,
+                ))
+        nikto = website.get("nikto", {})
+        for finding in nikto.get("findings", []):
+            findings.append(make_finding(
+                domain,
+                "Nikto web exposure finding",
+                finding,
+                "Nikto identified a web exposure item that should be reviewed by the website or hosting owner.",
+                "Review the finding, confirm whether it applies, and remediate or document acceptance.",
+                "High",
+                "Website",
+                "Medium",
+                "Medium",
+                finding,
+            ))
+    if not is_first_run:
+        for change in changes:
+            if change["severity"] in {"Critical", "High", "Medium"}:
+                findings.append(make_finding(
+                    change["domain"],
+                    change["type"] + " changed",
+                    f"{change['domain']} had a {change['category']} change: {change.get('changeType', 'changed')}.",
+                    "Unexpected external changes can indicate hosting, DNS, vendor, or security control drift.",
+                    "Confirm whether this change was authorized. If not, investigate and restore the previous known-good state.",
+                    change["severity"],
+                    change["owner"],
+                    "Low",
+                    "High",
+                    change,
+                ))
+    return sorted(findings, key=lambda finding: (-SEVERITY_RANK.get(finding["severity"], 0), finding["domain"], finding["title"]))
+
+
+def build_scorecard(domains: dict[str, Any], findings: list[dict[str, Any]]) -> list[dict[str, str]]:
+    def status_for(owner: str, high_threshold: int = 1) -> str:
+        owner_findings = [finding for finding in findings if finding["owner"] == owner]
+        if any(finding["severity"] in {"Critical", "High"} for finding in owner_findings):
+            return "Action Needed"
+        if len(owner_findings) >= high_threshold:
+            return "Watch"
+        return "Pass"
+
+    nikto_findings = [finding for finding in findings if "Nikto" in finding["title"]]
+    unknown_vendors = [finding for finding in findings if finding["owner"] == "Vendor"]
+    return [
+        {"area": "DNS health", "status": "Action Needed" if any("MX" in f["title"] or "NS" in f["title"] for f in findings) else "Pass", "summary": "DNS records are monitored for additions, removals, and sensitive changes."},
+        {"area": "Website security headers", "status": status_for("Website"), "summary": "Browser security headers and exposed hosting headers are checked."},
+        {"area": "Email security", "status": status_for("Email"), "summary": "SPF, DMARC, DKIM signals, MX provider, and spoofing risk are reviewed."},
+        {"area": "Vendor exposure", "status": "Watch" if unknown_vendors else "Pass", "summary": "Third-party hosts are categorized and unknown vendors are flagged."},
+        {"area": "External vulnerability scan", "status": "Action Needed" if nikto_findings else "Pass", "summary": "Nikto findings are promoted into customer-readable findings."},
+    ]
+
+
+def build_remediation(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    tasks = []
+    for finding in findings:
+        tasks.append({
+            "id": stable_id("task", finding["id"]),
+            "domain": finding["domain"],
+            "task": finding["recommendation"],
+            "sourceFinding": finding["id"],
+            "severity": finding["severity"],
+            "owner": finding["owner"],
+            "effort": finding["effort"],
+            "evidence": finding["evidence"],
+        })
+    return tasks
+
+
 def build_summary(domains: dict[str, Any], changes: list[dict[str, Any]], report_name: str) -> dict[str, Any]:
-    vendor_counts = {category: 0 for category in ("Analytics", "Advertising", "Social", "CDN", "Libraries", "Other")}
+    history = load_history()
+    is_first_run = not bool(history.get("domains"))
+    vendor_counts = {category: 0 for category in ("Analytics", "Advertising", "Social", "Fonts", "Payment", "Marketing", "CDN", "Libraries", "Unknown")}
     header_counts = {label: 0 for label in SECURITY_HEADERS.values()}
     vendors_table = {}
     sites = []
@@ -369,9 +710,9 @@ def build_summary(domains: dict[str, Any], changes: list[dict[str, Any]], report
             if header in headers:
                 header_counts[label] += 1
         for vendor in website.get("vendors", []):
-            vendor_counts[vendor["type"]] = vendor_counts.get(vendor["type"], 0) + 1
-            key = (vendor["name"], vendor["type"])
-            vendors_table.setdefault(key, {"name": vendor["name"], "type": vendor["type"], "sites": set(), "status": "observed"})
+            vendor_counts[vendor["category"]] = vendor_counts.get(vendor["category"], 0) + 1
+            key = (vendor["name"], vendor["category"])
+            vendors_table.setdefault(key, {"name": vendor["name"], "type": vendor["category"], "category": vendor["category"], "riskLabel": vendor["riskLabel"], "reason": vendor["reason"], "sites": set(), "status": "observed"})
             vendors_table[key]["sites"].add(domain)
         sites.append({
             "domain": domain,
@@ -401,20 +742,32 @@ def build_summary(domains: dict[str, Any], changes: list[dict[str, Any]], report
             for value in values[:10]:
                 dns_records.append({"domain": domain, "type": record_type, "value": value, "lastChange": data["timestamp"]})
 
+    findings = generate_findings(domains, changes, is_first_run)
+    scorecard = build_scorecard(domains, findings)
+    remediation = build_remediation(findings)
+    effective_changes = [] if is_first_run else changes
+
     return {
         "timestamp": utc_now(),
+        "mode": "baseline" if is_first_run else "monitoring",
+        "isFirstRun": is_first_run,
+        "baselineMessage": "This is your baseline. Future scans will highlight changes." if is_first_run else "",
         "totalDomains": total_domains,
         "averageSecurityScore": security_score,
-        "contentChanges": sum(1 for change in changes if change["category"] == "Website"),
-        "dnsChanges": sum(1 for change in changes if change["category"] == "DNS"),
+        "contentChanges": sum(1 for change in effective_changes if change["category"] == "Website"),
+        "dnsChanges": sum(1 for change in effective_changes if change["category"] == "DNS"),
         "newVendors": sum(len(data["website"].get("vendors", [])) for data in domains.values()),
         "criticalChanges": [
-            f"{change['domain']} {change['type']}" for change in changes
+            f"{change['domain']} {change['type']}" for change in effective_changes
             if change["category"] == "DNS" and change["type"] in {"MX", "NS", "TXT"}
         ],
+        "scorecard": scorecard,
+        "findings": findings,
+        "remediation": remediation,
+        "changes": effective_changes,
         "vendorTypes": vendor_counts,
         "securityHeaders": header_counts,
-        "recentChanges": recent_changes,
+        "recentChanges": [] if is_first_run else recent_changes,
         "dnsRecords": dns_records[:100],
         "vendors": [
             {
@@ -435,11 +788,41 @@ def build_summary(domains: dict[str, Any], changes: list[dict[str, Any]], report
 
 
 def write_html_report(summary: dict[str, Any], report_path: Path) -> None:
-    rows = []
+    scorecard_rows = []
+    for card in summary.get("scorecard", []):
+        scorecard_rows.append(
+            "<tr>"
+            f"<td>{html.escape(card['area'])}</td>"
+            f"<td>{html.escape(card['status'])}</td>"
+            f"<td>{html.escape(card['summary'])}</td>"
+            "</tr>"
+        )
+    finding_rows = []
+    for finding in summary.get("findings", [])[:25]:
+        finding_rows.append(
+            "<tr>"
+            f"<td>{html.escape(finding['severity'])}</td>"
+            f"<td>{html.escape(finding['title'])}<br><small>{html.escape(finding['summary'])}</small></td>"
+            f"<td>{html.escape(finding['impact'])}</td>"
+            f"<td>{html.escape(finding['recommendation'])}</td>"
+            f"<td>{html.escape(finding['owner'])}</td>"
+            "</tr>"
+        )
+    remediation_rows = []
+    for task in summary.get("remediation", [])[:25]:
+        remediation_rows.append(
+            "<tr>"
+            f"<td>{html.escape(task['severity'])}</td>"
+            f"<td>{html.escape(task['owner'])}</td>"
+            f"<td>{html.escape(task['effort'])}</td>"
+            f"<td>{html.escape(task['task'])}</td>"
+            "</tr>"
+        )
+    domain_rows = []
     for site in summary["sites"]:
         domain = site["domain"]
         data = summary["domains"][domain]
-        rows.append(
+        domain_rows.append(
             "<tr>"
             f"<td>{html.escape(domain)}</td>"
             f"<td>{html.escape(str(site.get('status')))}</td>"
@@ -456,38 +839,99 @@ def write_html_report(summary: dict[str, Any], report_path: Path) -> None:
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>External Domain Baseline</title>
   <style>
-    body {{ margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #07111f; color: #e8f1ff; }}
+    body {{ margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f7f6f0; color: #3d3926; }}
     main {{ max-width: 1180px; margin: 0 auto; padding: 42px 24px; }}
     h1 {{ font-size: 42px; margin: 0 0 10px; }}
-    .lede {{ color: #9fb4cc; margin-bottom: 28px; }}
+    h2 {{ margin-top: 34px; }}
+    .lede {{ color: #5f5532; margin-bottom: 28px; }}
     .stats {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }}
-    .stat, table {{ background: rgba(255,255,255,.06); border: 1px solid rgba(130,170,220,.24); border-radius: 8px; }}
+    .stat, table {{ background: rgba(255,255,255,.72); border: 1px solid rgba(95,85,50,.16); border-radius: 8px; }}
     .stat {{ padding: 18px; }}
-    .label {{ color: #8ea5bf; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; }}
+    .label {{ color: #7d703c; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; }}
     .value {{ font-size: 30px; font-weight: 800; margin-top: 6px; }}
     table {{ width: 100%; border-collapse: collapse; overflow: hidden; }}
-    th, td {{ padding: 13px 14px; border-bottom: 1px solid rgba(130,170,220,.18); text-align: left; }}
-    th {{ color: #a9bad0; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; background: rgba(255,255,255,.04); }}
+    th, td {{ padding: 13px 14px; border-bottom: 1px solid rgba(95,85,50,.14); text-align: left; vertical-align: top; }}
+    th {{ color: #5f5532; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; background: rgba(238,236,216,.68); }}
+    small {{ color: #5f5532; }}
   </style>
 </head>
 <body>
   <main>
     <h1>External Domain Baseline</h1>
     <p class="lede">Generated {html.escape(summary['timestamp'])}. Public-facing DNS, website, vendor, and email exposure baseline.</p>
+    {f"<p><strong>{html.escape(summary['baselineMessage'])}</strong></p>" if summary.get('baselineMessage') else ""}
     <section class="stats">
       <div class="stat"><div class="label">Domains</div><div class="value">{summary['totalDomains']}</div></div>
       <div class="stat"><div class="label">Security Score</div><div class="value">{summary['averageSecurityScore']}%</div></div>
       <div class="stat"><div class="label">DNS Changes</div><div class="value">{summary['dnsChanges']}</div></div>
       <div class="stat"><div class="label">Vendors</div><div class="value">{summary['newVendors']}</div></div>
     </section>
+    <h2>Customer Scorecard</h2>
+    <table><thead><tr><th>Area</th><th>Status</th><th>Summary</th></tr></thead><tbody>{''.join(scorecard_rows)}</tbody></table>
+    <h2>Plain-English Findings</h2>
+    <table><thead><tr><th>Severity</th><th>Finding</th><th>Impact</th><th>Recommended Fix</th><th>Owner</th></tr></thead><tbody>{''.join(finding_rows) or '<tr><td colspan="5">No findings.</td></tr>'}</tbody></table>
+    <h2>Remediation Checklist</h2>
+    <table><thead><tr><th>Severity</th><th>Owner</th><th>Effort</th><th>Task</th></tr></thead><tbody>{''.join(remediation_rows) or '<tr><td colspan="4">No remediation tasks.</td></tr>'}</tbody></table>
+    <h2>Domain Evidence</h2>
     <table>
       <thead><tr><th>Domain</th><th>Status</th><th>DNS Changes</th><th>Vendors</th><th>Public Emails</th><th>MX Records</th></tr></thead>
-      <tbody>{''.join(rows)}</tbody>
+      <tbody>{''.join(domain_rows)}</tbody>
     </table>
   </main>
 </body>
 </html>
 """)
+
+
+def send_watch_alerts(summary: dict[str, Any], report_name: str) -> None:
+    high_items = [
+        finding for finding in summary.get("findings", [])
+        if finding.get("severity") in {"Critical", "High"}
+    ]
+    high_items.extend([
+        change for change in summary.get("changes", [])
+        if change.get("severity") in {"Critical", "High"}
+    ])
+    if not high_items:
+        return
+
+    lines = [
+        "External Domain Baseline alert",
+        f"Generated: {summary['timestamp']}",
+        f"Report: domain_reports/{report_name}",
+        "",
+        "High priority items:",
+    ]
+    for item in high_items[:10]:
+        title = item.get("title") or f"{item.get('domain')} {item.get('type')}"
+        lines.append(f"- {title}")
+    message = "\n".join(lines)
+
+    webhook = os.environ.get("SLACK_WEBHOOK_URL")
+    if webhook:
+        try:
+            request = Request(webhook, data=json.dumps({"text": message}).encode("utf-8"), headers={"Content-Type": "application/json"})
+            urlopen(request, timeout=10).read()
+        except (OSError, URLError, TimeoutError) as exc:
+            print(f"Slack alert failed: {exc}", file=sys.stderr)
+
+    smtp_host = os.environ.get("SMTP_HOST")
+    smtp_to = os.environ.get("SMTP_TO")
+    smtp_from = os.environ.get("SMTP_FROM", "external-baseline@localhost")
+    if smtp_host and smtp_to:
+        try:
+            email = EmailMessage()
+            email["Subject"] = "External Domain Baseline alert"
+            email["From"] = smtp_from
+            email["To"] = smtp_to
+            email.set_content(message)
+            with smtplib.SMTP(smtp_host, int(os.environ.get("SMTP_PORT", "25")), timeout=10) as smtp:
+                if os.environ.get("SMTP_USERNAME"):
+                    smtp.starttls()
+                    smtp.login(os.environ["SMTP_USERNAME"], os.environ.get("SMTP_PASSWORD", ""))
+                smtp.send_message(email)
+        except (OSError, smtplib.SMTPException) as exc:
+            print(f"Email alert failed: {exc}", file=sys.stderr)
 
 
 def analyze_domain(domain: str, skip_nikto: bool = False) -> dict[str, Any]:
@@ -536,6 +980,7 @@ def main() -> int:
 
     SUMMARY_PATH.write_text(json.dumps(summary, indent=2))
     write_html_report(summary, REPORTS_DIR / report_name)
+    send_watch_alerts(summary, report_name)
     save_history(current)
     print(f"Wrote {SUMMARY_PATH}")
     print(f"Wrote {REPORTS_DIR / report_name}")

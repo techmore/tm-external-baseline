@@ -10,7 +10,11 @@ The tool runs locally, stores history locally, and produces a lightweight websit
 - Website status, redirects, TLS, headers, and third-party vendors
 - Nikto web exposure findings when `nikto` is installed
 - Domain email exposure from public pages plus common mailbox aliases
+- SPF, DMARC, DKIM selector discovery, MX provider, and spoofing risk
 - Change history between scans
+- Plain-English findings with impact, recommendation, confidence, owner, severity, and effort
+- Customer scorecards using `Pass`, `Watch`, and `Action Needed`
+- Remediation checklist tasks
 
 ## Quick Start
 
@@ -51,6 +55,18 @@ Skip Nikto for faster scans:
 ./run.sh --skip-nikto
 ```
 
+## Customer Output
+
+Each scan generates:
+
+- Customer scorecard
+- Plain-English findings
+- Before/after change timeline
+- Email security summary
+- Vendor risk labels
+- Remediation checklist
+- HTML report suitable for browser print-to-PDF
+
 ## Daily Monitoring
 
 Install a daily local cron job:
@@ -67,6 +83,20 @@ Show or remove it:
 ```
 
 The scheduled job runs `./run.sh` and appends logs to `domain_reports/scheduled.log`.
+
+Optional alert environment variables:
+
+```bash
+export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/..."
+export SMTP_HOST="smtp.example.com"
+export SMTP_PORT="587"
+export SMTP_USERNAME="user"
+export SMTP_PASSWORD="password"
+export SMTP_FROM="baseline@example.com"
+export SMTP_TO="security@example.com"
+```
+
+Alerts are sent only when high-priority findings or changes are present.
 
 ## Outputs
 

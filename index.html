@@ -288,6 +288,13 @@
       margin-bottom: 20px;
     }
 
+    .scorecard-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
     .panel {
       padding: 20px;
       overflow: hidden;
@@ -397,6 +404,26 @@
       color: var(--olive-900);
     }
 
+    .status-pass { color: #1c7c45; border-color: rgba(28, 124, 69, 0.28); background: rgba(28, 157, 91, 0.1); }
+    .status-watch { color: #8f6f29; border-color: rgba(180, 142, 46, 0.32); background: rgba(237, 219, 144, 0.32); }
+    .status-action-needed { color: #8d342e; border-color: rgba(159, 61, 53, 0.28); background: rgba(159, 61, 53, 0.08); }
+
+    .baseline-note {
+      display: none;
+      margin-bottom: 18px;
+      border: 1px solid rgba(155, 141, 77, 0.28);
+      border-radius: 16px;
+      padding: 16px 18px;
+      color: var(--olive-800);
+      background: rgba(252, 249, 237, 0.7);
+    }
+
+    .section-stack {
+      display: grid;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
     .table-wrap {
       overflow-x: auto;
       border: 1px solid var(--line);
@@ -473,6 +500,7 @@
     @media (max-width: 900px) {
       .hero, .grid { grid-template-columns: 1fr; }
       .report-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .scorecard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .nav-links { display: none; }
     }
@@ -482,6 +510,7 @@
       .hero { padding-top: 42px; }
       .stats { grid-template-columns: 1fr; }
       .report-grid { grid-template-columns: 1fr; }
+      .scorecard-grid { grid-template-columns: 1fr; }
       .hero-actions .button { width: 100%; }
     }
   </style>
@@ -495,6 +524,8 @@
       </div>
       <div class="nav-links">
         <a href="#baseline">Baseline</a>
+        <a href="#scorecard">Scorecard</a>
+        <a href="#findings">Findings</a>
         <a href="#reports">Reports</a>
         <a href="#vendors">Vendors</a>
         <a href="#domains">Domains</a>
@@ -510,8 +541,9 @@
         <h1>Your domains, scanned the way outsiders see them.</h1>
         <p class="lede">This homepage is powered by a live self-baseline: DNS, website status, security headers, vendors, Nikto exposure checks, and public email enumeration.</p>
         <div class="hero-actions">
-          <a class="button" id="latestReportLink" href="../domain_reports/latest_summary.json">View latest report</a>
-          <a class="button ghost" href="domains.txt">Domains file</a>
+          <a class="button" id="latestReportLink" href="domain_reports/latest_summary.json">View latest report</a>
+          <a class="button ghost" id="downloadReportLink" href="domain_reports/latest_summary.json" download>Download report</a>
+          <a class="button ghost" id="domainsFileLink" href="domains.txt">Domains file</a>
         </div>
       </div>
       <aside class="hero-panel" aria-label="Baseline command">
@@ -535,6 +567,8 @@
       <span id="alertContent"></span>
     </div>
 
+    <div class="baseline-note" id="baselineNote"></div>
+
     <section class="stats" id="baseline">
       <div class="stat">
         <div class="stat-label">Last Check</div>
@@ -555,6 +589,52 @@
         <div class="stat-label">Nikto / Vendors</div>
         <div class="stat-value" id="vendorChanges">...</div>
         <div class="stat-note">Third-party hosts plus exposure findings</div>
+      </div>
+    </section>
+
+    <section class="scorecard-grid" id="scorecard"></section>
+
+    <section class="section-stack" id="findings">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Plain-English Findings</h2>
+          <span class="subtle" id="findingsSummary">Loading...</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Severity</th>
+                <th>Finding</th>
+                <th>Impact</th>
+                <th>Recommended Fix</th>
+                <th>Owner</th>
+                <th>Effort</th>
+              </tr>
+            </thead>
+            <tbody id="findingsList"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Remediation Checklist</h2>
+          <span class="subtle" id="remediationSummary">Loading...</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Severity</th>
+                <th>Owner</th>
+                <th>Effort</th>
+                <th>Task</th>
+              </tr>
+            </thead>
+            <tbody id="remediationList"></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -625,10 +705,12 @@
   <footer class="shell">External Domain Baseline</footer>
 
   <script>
+    const assetPrefix = window.location.pathname.includes("/dashboard/") ? "../" : "";
     const summaryPaths = [
+      `${assetPrefix}domain_reports/latest_summary.json`,
+      "domain_reports/latest_summary.json",
       "../domain_reports/latest_summary.json",
-      "/domain_reports/latest_summary.json",
-      "domain_reports/latest_summary.json"
+      "/domain_reports/latest_summary.json"
     ];
 
     const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -671,6 +753,7 @@
 
     function renderDashboard(data) {
       const primaryDomain = (data.sites && data.sites[0] && data.sites[0].domain) || "your-domain.example";
+      const statusClass = (status) => `status-${String(status || "").toLowerCase().replace(/\s+/g, "-")}`;
       document.getElementById("lastCheck").textContent = formatDate(data.timestamp);
       document.getElementById("securityScore").textContent = `${data.averageSecurityScore ?? 0}%`;
       document.getElementById("contentChanges").textContent = `${data.contentChanges ?? 0} website changes`;
@@ -682,8 +765,18 @@
       document.getElementById("domainSummary").textContent = `${data.totalDomains ?? (data.sites || []).length} domains monitored`;
 
       const latestReport = data.recentReports && data.recentReports[0] && data.recentReports[0].url;
+      document.getElementById("domainsFileLink").href = `${assetPrefix}domains.txt`;
       if (latestReport) {
-        document.getElementById("latestReportLink").href = `../domain_reports/${latestReport}`;
+        document.getElementById("latestReportLink").href = `${assetPrefix}domain_reports/${latestReport}`;
+        document.getElementById("downloadReportLink").href = `${assetPrefix}domain_reports/${latestReport}`;
+      }
+
+      const baselineNote = document.getElementById("baselineNote");
+      if (data.baselineMessage) {
+        baselineNote.style.display = "block";
+        baselineNote.textContent = data.baselineMessage;
+      } else {
+        baselineNote.style.display = "none";
       }
 
       const criticalChanges = data.criticalChanges || [];
@@ -697,18 +790,62 @@
 
       renderList(
         document.getElementById("changeTimeline"),
-        data.recentChanges || [],
+        data.changes || data.recentChanges || [],
         (change) => `
           <div class="item">
             <div class="item-title">
               <span>${escapeHtml(change.domain)}</span>
-              <span class="pill">${formatDate(change.timestamp)}</span>
+              <span class="pill">${escapeHtml(change.severity || "Info")}</span>
             </div>
-            <div class="item-body">${escapeHtml(change.description)}</div>
+            <div class="item-body">
+              ${escapeHtml(change.description || `${change.category} ${change.type} changed`)}<br>
+              <strong>Before:</strong> ${escapeHtml(Array.isArray(change.before) ? change.before.join(", ") : change.before ?? "None")}<br>
+              <strong>After:</strong> ${escapeHtml(Array.isArray(change.after) ? change.after.join(", ") : change.after ?? "None")}
+            </div>
           </div>
         `,
         "No changes recorded yet. The first baseline run becomes the comparison point."
       );
+
+      const scorecard = data.scorecard || [];
+      document.getElementById("scorecard").innerHTML = scorecard.map((card) => `
+        <article class="report-card ${statusClass(card.status)}">
+          <div>
+            <div class="report-kicker">Scorecard</div>
+            <div class="report-title">${escapeHtml(card.area)}</div>
+            <div class="report-summary">${escapeHtml(card.summary)}</div>
+          </div>
+          <span class="pill ${statusClass(card.status)}">${escapeHtml(card.status)}</span>
+        </article>
+      `).join("");
+
+      const findings = data.findings || [];
+      document.getElementById("findingsSummary").textContent = `${findings.length} findings`;
+      document.getElementById("findingsList").innerHTML = findings.length
+        ? findings.map((finding) => `
+          <tr>
+            <td><span class="pill">${escapeHtml(finding.severity)}</span></td>
+            <td><strong>${escapeHtml(finding.title)}</strong><br>${escapeHtml(finding.summary)}<br><span class="subtle">Confidence: ${escapeHtml(finding.confidence)}</span></td>
+            <td>${escapeHtml(finding.impact)}</td>
+            <td>${escapeHtml(finding.recommendation)}</td>
+            <td>${escapeHtml(finding.owner)}</td>
+            <td>${escapeHtml(finding.effort)}</td>
+          </tr>
+        `).join("")
+        : emptyRow("No customer-facing findings in the latest run.", 6);
+
+      const remediation = data.remediation || [];
+      document.getElementById("remediationSummary").textContent = `${remediation.length} tasks`;
+      document.getElementById("remediationList").innerHTML = remediation.length
+        ? remediation.map((task) => `
+          <tr>
+            <td><span class="pill">${escapeHtml(task.severity)}</span></td>
+            <td>${escapeHtml(task.owner)}</td>
+            <td>${escapeHtml(task.effort)}</td>
+            <td>${escapeHtml(task.task)}</td>
+          </tr>
+        `).join("")
+        : emptyRow("No remediation tasks in the latest run.", 4);
 
       const fallbackSections = [
         { id: "dns", title: "DNS Records", summary: "Run the baseline to populate DNS records.", items: [] },
@@ -752,10 +889,10 @@
         ? vendors.map((vendor) => `
           <tr>
             <td>${escapeHtml(vendor.name)}</td>
-            <td><span class="pill">${escapeHtml(vendor.type)}</span></td>
+            <td><span class="pill">${escapeHtml(vendor.category || vendor.type)}</span></td>
             <td>${formatDate(vendor.firstSeen)}</td>
             <td>${formatDate(vendor.lastChange)}</td>
-            <td>${escapeHtml(vendor.status || "observed")}</td>
+            <td>${escapeHtml(vendor.riskLabel || vendor.status || "observed")}</td>
             <td>${escapeHtml(vendor.siteCount ?? 0)}</td>
           </tr>
         `).join("")
@@ -770,7 +907,7 @@
             <td>${formatDate(site.lastChange)}</td>
             <td>${escapeHtml(site.dnsChanges ?? 0)}</td>
             <td>${escapeHtml(site.vendorCount ?? 0)}</td>
-            <td><a class="pill" href="../domain_reports/${encodeURIComponent(site.reportFile || latestReport || "latest_summary.json")}">Open</a></td>
+            <td><a class="pill" href="${assetPrefix}domain_reports/${encodeURIComponent(site.reportFile || latestReport || "latest_summary.json")}">Open</a></td>
           </tr>
         `).join("")
         : emptyRow("No monitored domains found. Add domains in domains.txt.", 6);

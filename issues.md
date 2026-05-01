@@ -1,5 +1,7 @@
 # Product Issues
 
+Status: implemented in the scanner/dashboard data model. Keep this file as the product roadmap and acceptance reference for future refinements.
+
 This roadmap turns the external baseline scanner into a customer-facing product. The priority is helping customers understand what changed, why it matters, and what to do next.
 
 ## P0 - Plain-English Findings
@@ -240,12 +242,12 @@ This roadmap turns the external baseline scanner into a customer-facing product.
 
 ## Suggested Build Order
 
-1. First-run baseline explanation
-2. Findings data model
-3. Customer scorecard
-4. Email security checks
-5. Remediation checklist
-6. Before/after timeline
-7. Vendor risk labels
-8. HTML report export polish
-9. Watch mode alerts
+1. First-run baseline explanation - implemented
+2. Findings data model - implemented
+3. Customer scorecard - implemented
+4. Email security checks - implemented
+5. Remediation checklist - implemented
+6. Before/after timeline - implemented
+7. Vendor risk labels - implemented
+8. HTML report export polish - implemented
+9. Watch mode alerts - implemented for daily scans plus high-priority Slack/SMTP alerts; weekly digest can be refined later
