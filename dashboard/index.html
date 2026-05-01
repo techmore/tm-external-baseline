@@ -365,6 +365,15 @@
       box-shadow: var(--shadow);
     }
 
+    .scorecard-card {
+      cursor: pointer;
+    }
+
+    .scorecard-card.is-active {
+      outline: 2px solid rgba(95, 85, 50, 0.36);
+      box-shadow: var(--shadow);
+    }
+
     .report-kicker {
       color: var(--olive-600);
       font-size: 11px;
@@ -807,32 +816,47 @@
         "No changes recorded yet. The first baseline run becomes the comparison point."
       );
 
+      const findings = data.findings || [];
+      const renderFindings = (visibleFindings, label = `${findings.length} findings`) => {
+        document.getElementById("findingsSummary").textContent = label;
+        document.getElementById("findingsList").innerHTML = visibleFindings.length
+          ? visibleFindings.map((finding) => `
+            <tr id="finding-${escapeHtml(finding.id)}">
+              <td><span class="pill">${escapeHtml(finding.severity)}</span></td>
+              <td><strong>${escapeHtml(finding.title)}</strong><br>${escapeHtml(finding.summary)}<br><span class="subtle">Confidence: ${escapeHtml(finding.confidence)}${finding.baselineObservation ? " | Baseline observation" : ""}</span></td>
+              <td>${escapeHtml(finding.impact)}</td>
+              <td>${escapeHtml(finding.recommendation)}</td>
+              <td>${escapeHtml(finding.owner)}</td>
+              <td>${escapeHtml(finding.effort)}</td>
+            </tr>
+          `).join("")
+          : emptyRow("No customer-facing findings in this filter.", 6);
+      };
+
       const scorecard = data.scorecard || [];
-      document.getElementById("scorecard").innerHTML = scorecard.map((card) => `
-        <article class="report-card ${statusClass(card.status)}">
+      document.getElementById("scorecard").innerHTML = scorecard.map((card, index) => `
+        <article class="report-card scorecard-card ${statusClass(card.status)}" data-scorecard-index="${index}">
           <div>
             <div class="report-kicker">Scorecard</div>
             <div class="report-title">${escapeHtml(card.area)}</div>
             <div class="report-summary">${escapeHtml(card.summary)}</div>
           </div>
-          <span class="pill ${statusClass(card.status)}">${escapeHtml(card.status)}</span>
+          <span class="pill ${statusClass(card.status)}">${escapeHtml(card.status)}${card.findingCount ? ` | ${card.findingCount}` : ""}</span>
         </article>
       `).join("");
-
-      const findings = data.findings || [];
-      document.getElementById("findingsSummary").textContent = `${findings.length} findings`;
-      document.getElementById("findingsList").innerHTML = findings.length
-        ? findings.map((finding) => `
-          <tr>
-            <td><span class="pill">${escapeHtml(finding.severity)}</span></td>
-            <td><strong>${escapeHtml(finding.title)}</strong><br>${escapeHtml(finding.summary)}<br><span class="subtle">Confidence: ${escapeHtml(finding.confidence)}</span></td>
-            <td>${escapeHtml(finding.impact)}</td>
-            <td>${escapeHtml(finding.recommendation)}</td>
-            <td>${escapeHtml(finding.owner)}</td>
-            <td>${escapeHtml(finding.effort)}</td>
-          </tr>
-        `).join("")
-        : emptyRow("No customer-facing findings in the latest run.", 6);
+      document.querySelectorAll(".scorecard-card").forEach((cardNode) => {
+        cardNode.addEventListener("click", () => {
+          const index = Number(cardNode.dataset.scorecardIndex);
+          const card = scorecard[index];
+          const ids = new Set(card.findingIds || []);
+          const filtered = findings.filter((finding) => ids.has(finding.id));
+          document.querySelectorAll(".scorecard-card").forEach((node) => node.classList.remove("is-active"));
+          cardNode.classList.add("is-active");
+          renderFindings(filtered, `${card.area}: ${filtered.length} findings`);
+          document.getElementById("findings").scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+      renderFindings(findings);
 
       const remediation = data.remediation || [];
       document.getElementById("remediationSummary").textContent = `${remediation.length} tasks`;

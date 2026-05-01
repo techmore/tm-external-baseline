@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>External Domain Baseline</title>
+  <style>
+    body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f7f6f0; color: #3d3926; }
+    main { max-width: 1180px; margin: 0 auto; padding: 42px 24px; }
+    h1 { font-size: 42px; margin: 0 0 10px; }
+    h2 { margin-top: 34px; }
+    .lede { color: #5f5532; margin-bottom: 28px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
+    .stat, table { background: rgba(255,255,255,.72); border: 1px solid rgba(95,85,50,.16); border-radius: 8px; }
+    .stat { padding: 18px; }
+    .label { color: #7d703c; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; }
+    .value { font-size: 30px; font-weight: 800; margin-top: 6px; }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; }
+    th, td { padding: 13px 14px; border-bottom: 1px solid rgba(95,85,50,.14); text-align: left; vertical-align: top; }
+    th { color: #5f5532; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; background: rgba(238,236,216,.68); }
+    small { color: #5f5532; }
+    pre { white-space: pre-wrap; word-break: break-word; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>External Domain Baseline</h1>
+    <p class="lede">Generated 2026-05-01T03:05:38Z. Public-facing DNS, website, vendor, and email exposure baseline.</p>
+    
+    <section class="stats">
+      <div class="stat"><div class="label">Domains</div><div class="value">1</div></div>
+      <div class="stat"><div class="label">Security Score</div><div class="value">0%</div></div>
+      <div class="stat"><div class="label">DNS Changes</div><div class="value">0</div></div>
+      <div class="stat"><div class="label">Vendors</div><div class="value">7</div></div>
+    </section>
+    <h2>Customer Scorecard</h2>
+    <table><thead><tr><th>Area</th><th>Status</th><th>Summary</th></tr></thead><tbody><tr><td>DNS health</td><td>Pass</td><td>DNS records are monitored for additions, removals, and sensitive changes.</td></tr><tr><td>Website security headers</td><td>Action Needed</td><td>Browser security headers and exposed hosting headers are checked.</td></tr><tr><td>Email authentication</td><td>Action Needed</td><td>SPF, DKIM, DMARC, MX provider, and spoofing risk are reviewed.</td></tr><tr><td>Vendor exposure</td><td>Watch</td><td>Third-party hosts are categorized and unknown vendors are flagged.</td></tr><tr><td>External vulnerability scan</td><td>Pass</td><td>Nikto findings are promoted into customer-readable findings.</td></tr></tbody></table>
+    <h2>Plain-English Findings</h2>
+    <table><thead><tr><th>Severity</th><th>Finding</th><th>Impact</th><th>Recommended Fix</th><th>Owner</th></tr></thead><tbody><tr><td>High</td><td>CSP header is missing<br><small>cybersecuritypilot.org does not publish the content-security-policy header.</small></td><td>Missing CSP can reduce browser-side protection for visitors.</td><td>Add a content-security-policy header at the web server, CDN, or hosting layer.</td><td>Website</td></tr><tr><td>High</td><td>DMARC record is missing<br><small>cybersecuritypilot.org does not publish a DMARC policy.</small></td><td>Mailbox providers get less guidance on how to handle spoofed mail.</td><td>Publish a _dmarc TXT record, starting with p=none for monitoring and moving toward quarantine or reject.</td><td>Email</td></tr><tr><td>High</td><td>Email spoofing risk is high<br><small>cybersecuritypilot.org is missing both SPF and DMARC.</small></td><td>Customers, staff, or vendors may receive convincing spoofed messages that appear to come from this domain.</td><td>Add SPF and DMARC records, then validate them with a follow-up scan.</td><td>Email</td></tr><tr><td>High</td><td>HSTS header is missing<br><small>cybersecuritypilot.org does not publish the strict-transport-security header.</small></td><td>Missing HSTS can reduce browser-side protection for visitors.</td><td>Add a strict-transport-security header at the web server, CDN, or hosting layer.</td><td>Website</td></tr><tr><td>High</td><td>SPF record is missing<br><small>cybersecuritypilot.org does not publish an SPF record.</small></td><td>Attackers may have an easier time spoofing mail from this domain.</td><td>Publish a TXT record beginning with v=spf1 that includes authorized mail senders.</td><td>Email</td></tr><tr><td>Medium</td><td>Referrer-Policy header is missing<br><small>cybersecuritypilot.org does not publish the referrer-policy header.</small></td><td>Missing Referrer-Policy can reduce browser-side protection for visitors.</td><td>Add a referrer-policy header at the web server, CDN, or hosting layer.</td><td>Website</td></tr><tr><td>Medium</td><td>Unknown third-party vendor observed<br><small>cybersecuritypilot.org loads content from cdn.tailwindcss.com, which is not categorized yet.</small></td><td>Unreviewed third-party scripts or assets can introduce availability, privacy, or security risk.</td><td>Validate the vendor purpose and categorize it as approved or remove it if unnecessary.</td><td>Vendor</td></tr><tr><td>Medium</td><td>Unknown third-party vendor observed<br><small>cybersecuritypilot.org loads content from techmore.github.io, which is not categorized yet.</small></td><td>Unreviewed third-party scripts or assets can introduce availability, privacy, or security risk.</td><td>Validate the vendor purpose and categorize it as approved or remove it if unnecessary.</td><td>Vendor</td></tr><tr><td>Medium</td><td>Unknown third-party vendor observed<br><small>cybersecuritypilot.org loads content from techmore.github.io, which is not categorized yet.</small></td><td>Unreviewed third-party scripts or assets can introduce availability, privacy, or security risk.</td><td>Validate the vendor purpose and categorize it as approved or remove it if unnecessary.</td><td>Vendor</td></tr><tr><td>Medium</td><td>XCTO header is missing<br><small>cybersecuritypilot.org does not publish the x-content-type-options header.</small></td><td>Missing XCTO can reduce browser-side protection for visitors.</td><td>Add a x-content-type-options header at the web server, CDN, or hosting layer.</td><td>Website</td></tr><tr><td>Medium</td><td>XFO header is missing<br><small>cybersecuritypilot.org does not publish the x-frame-options header.</small></td><td>Missing XFO can reduce browser-side protection for visitors.</td><td>Add a x-frame-options header at the web server, CDN, or hosting layer.</td><td>Website</td></tr><tr><td>Low</td><td>server header is exposed<br><small>cybersecuritypilot.org exposes server: GitHub.com.</small></td><td>Technology disclosure can help attackers fingerprint hosting or application components.</td><td>Review whether the server header is needed and remove or reduce it when possible.</td><td>Hosting</td></tr><tr><td>Low</td><td>via header is exposed<br><small>cybersecuritypilot.org exposes via: 1.1 varnish.</small></td><td>Technology disclosure can help attackers fingerprint hosting or application components.</td><td>Review whether the via header is needed and remove or reduce it when possible.</td><td>Hosting</td></tr></tbody></table>
+    <h2>Remediation Checklist</h2>
+    <table><thead><tr><th>Severity</th><th>Owner</th><th>Effort</th><th>Task</th></tr></thead><tbody><tr><td>High</td><td>Website</td><td>Low</td><td>Add a content-security-policy header at the web server, CDN, or hosting layer.</td></tr><tr><td>High</td><td>Email</td><td>Medium</td><td>Publish a _dmarc TXT record, starting with p=none for monitoring and moving toward quarantine or reject.</td></tr><tr><td>High</td><td>Email</td><td>Medium</td><td>Add SPF and DMARC records, then validate them with a follow-up scan.</td></tr><tr><td>High</td><td>Website</td><td>Low</td><td>Add a strict-transport-security header at the web server, CDN, or hosting layer.</td></tr><tr><td>High</td><td>Email</td><td>Medium</td><td>Publish a TXT record beginning with v=spf1 that includes authorized mail senders.</td></tr><tr><td>Medium</td><td>Website</td><td>Low</td><td>Add a referrer-policy header at the web server, CDN, or hosting layer.</td></tr><tr><td>Medium</td><td>Vendor</td><td>Low</td><td>Validate the vendor purpose and categorize it as approved or remove it if unnecessary.</td></tr><tr><td>Medium</td><td>Vendor</td><td>Low</td><td>Validate the vendor purpose and categorize it as approved or remove it if unnecessary.</td></tr><tr><td>Medium</td><td>Vendor</td><td>Low</td><td>Validate the vendor purpose and categorize it as approved or remove it if unnecessary.</td></tr><tr><td>Medium</td><td>Website</td><td>Low</td><td>Add a x-content-type-options header at the web server, CDN, or hosting layer.</td></tr><tr><td>Medium</td><td>Website</td><td>Low</td><td>Add a x-frame-options header at the web server, CDN, or hosting layer.</td></tr><tr><td>Low</td><td>Hosting</td><td>Low</td><td>Review whether the server header is needed and remove or reduce it when possible.</td></tr><tr><td>Low</td><td>Hosting</td><td>Low</td><td>Review whether the via header is needed and remove or reduce it when possible.</td></tr></tbody></table>
+    <h2>Domain Evidence</h2>
+    <table>
+      <thead><tr><th>Domain</th><th>Status</th><th>DNS Changes</th><th>Vendors</th><th>Public Emails</th><th>MX Records</th></tr></thead>
+      <tbody><tr><td>cybersecuritypilot.org</td><td>200</td><td>0</td><td>7</td><td>0</td><td>1 smtp.google.com.</td></tr></tbody>
+    </table>
+    <h2>Technical Evidence Appendix</h2>
+    <table><thead><tr><th>Domain</th><th>Evidence Type</th><th>Raw Evidence</th></tr></thead><tbody><tr><td>cybersecuritypilot.org</td><td>DNS</td><td><pre>{
+  &quot;A&quot;: [
+    &quot;185.199.108.153&quot;,
+    &quot;185.199.109.153&quot;,
+    &quot;185.199.110.153&quot;,
+    &quot;185.199.111.153&quot;
+  ],
+  &quot;AAAA&quot;: [],
+  &quot;MX&quot;: [
+    &quot;1 smtp.google.com.&quot;
+  ],
+  &quot;NS&quot;: [
+    &quot;ns1.hover.com.&quot;,
+    &quot;ns2.hover.com.&quot;
+  ],
+  &quot;TXT&quot;: [
+    &quot;\&quot;CSP-verification-a88fbb45fe6aec95d98c16e7872475515611af44a9267eb2c89c6b49891efcf6\&quot;&quot;,
+    &quot;\&quot;google-site-verification=-F7YSQ9ZuWrJxLZM95edc8mIYfxp6YwTq87QR90RgRE\&quot;&quot;
+  ],
+  &quot;CAA&quot;: []
+}</pre></td></tr><tr><td>cybersecuritypilot.org</td><td>Email health</td><td><pre>{
+  &quot;mxPresent&quot;: true,
+  &quot;mxRecords&quot;: [
+    &quot;1 smtp.google.com.&quot;
+  ],
+  &quot;mxProvider&quot;: &quot;Google Workspace&quot;,
+  &quot;spf&quot;: {
+    &quot;present&quot;: false,
+    &quot;records&quot;: [],
+    &quot;valid&quot;: false
+  },
+  &quot;dmarc&quot;: {
+    &quot;present&quot;: false,
+    &quot;records&quot;: [],
+    &quot;policy&quot;: &quot;missing&quot;
+  },
+  &quot;dkim&quot;: {
+    &quot;selectorsChecked&quot;: [
+      &quot;google&quot;,
+      &quot;selector1&quot;,
+      &quot;selector2&quot;,
+      &quot;default&quot;,
+      &quot;k1&quot;,
+      &quot;mail&quot;,
+      &quot;s1&quot;,
+      &quot;s2&quot;
+    ],
+    &quot;records&quot;: [
+      {
+        &quot;selector&quot;: &quot;google&quot;,
+        &quot;records&quot;: [
+          &quot;\&quot;v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3I1SGJRu7zlU/1p9fUJDxwri711fDE+Yhlahu2r/Xkg8R5lzNXO1V8K0UzLFO2dVWvyx9QKGI65iaLIfWc4AlKWHmc7p6iMF+cQckOGxkRRQen8uePF6JIqJQWh9PZYnK7VU2I2UnTSnGWC3xF7sHRPRB9xN1NENOimk6B3+mizau6TzQA9fpIzMYSE60SbxeVUwSsuQkHDv0JCkFOhcjpnENhEFB2dCs8MXBPQrluhP/njpGIR/r00hml8Yfv3NNDGe5l+5MeWEuJzdkBUJpA0+9Qyvb/R7QCw+brtVwnGsaxl9+Gh0iHYXEjOMEG2vMutTQ5WbrGagyj5RKtt3kQIDAQAB\&quot;&quot;
+        ]
+      }
+    ],
+    &quot;present&quot;: true
+  },
+  &quot;health&quot;: {
+    &quot;overall&quot;: &quot;Action Needed&quot;,
+    &quot;spf&quot;: {
+      &quot;status&quot;: &quot;Action Needed&quot;,
+      &quot;label&quot;: &quot;SPF&quot;,
+      &quot;summary&quot;: &quot;SPF record missing&quot;,
+      &quot;whyItMatters&quot;: &quot;SPF tells receiving mail servers which systems may send mail for this domain.&quot;
+    },
+    &quot;dkim&quot;: {
+      &quot;status&quot;: &quot;Pass&quot;,
+      &quot;label&quot;: &quot;DKIM&quot;,
+      &quot;summary&quot;: &quot;1 selector(s) discovered&quot;,
+      &quot;whyItMatters&quot;: &quot;DKIM cryptographically signs outbound mail so receivers can verify message authenticity.&quot;
+    },
+    &quot;dmarc&quot;: {
+      &quot;status&quot;: &quot;Action Needed&quot;,
+      &quot;label&quot;: &quot;DMARC&quot;,
+      &quot;summary&quot;: &quot;DMARC record missing&quot;,
+      &quot;whyItMatters&quot;: &quot;DMARC tells receivers what to do when SPF or DKIM authentication fails.&quot;
+    }
+  },
+  &quot;spoofingRisk&quot;: &quot;High&quot;,
+  &quot;discovered&quot;: [],
+  &quot;commonAliases&quot;: [
+    &quot;admin@cybersecuritypilot.org&quot;,
+    &quot;contact@cybersecuritypilot.org&quot;,
+    &quot;hello@cybersecuritypilot.org&quot;,
+    &quot;info@cybersecuritypilot.org&quot;,
+    &quot;security@cybersecuritypilot.org&quot;,
+    &quot;support@cybersecuritypilot.org&quot;,
+    &quot;webmaster@cybersecuritypilot.org&quot;
+  ],
+  &quot;totalPublicEmails&quot;: 0
+}</pre></td></tr><tr><td>cybersecuritypilot.org</td><td>Website and vendors</td><td><pre>{
+  &quot;url&quot;: &quot;https://cybersecuritypilot.org&quot;,
+  &quot;status&quot;: 200,
+  &quot;securityAnalysis&quot;: {
+    &quot;checks&quot;: [
+      {
+        &quot;name&quot;: &quot;HSTS&quot;,
+        &quot;header&quot;: &quot;strict-transport-security&quot;,
+        &quot;present&quot;: false,
+        &quot;value&quot;: null,
+        &quot;description&quot;: &quot;Forces browsers to use HTTPS after the first successful visit.&quot;
+      },
+      {
+        &quot;name&quot;: &quot;CSP&quot;,
+        &quot;header&quot;: &quot;content-security-policy&quot;,
+        &quot;present&quot;: false,
+        &quot;value&quot;: null,
+        &quot;description&quot;: &quot;Limits where scripts, frames, and other active content may load from.&quot;
+      },
+      {
+        &quot;name&quot;: &quot;XFO&quot;,
+        &quot;header&quot;: &quot;x-frame-options&quot;,
+        &quot;present&quot;: false,
+        &quot;value&quot;: null,
+        &quot;description&quot;: &quot;Reduces clickjacking risk by controlling frame embedding.&quot;
+      },
+      {
+        &quot;name&quot;: &quot;XCTO&quot;,
+        &quot;header&quot;: &quot;x-content-type-options&quot;,
+        &quot;present&quot;: false,
+        &quot;value&quot;: null,
+        &quot;description&quot;: &quot;Prevents MIME sniffing in supported browsers.&quot;
+      },
+      {
+        &quot;name&quot;: &quot;Referrer-Policy&quot;,
+        &quot;header&quot;: &quot;referrer-policy&quot;,
+        &quot;present&quot;: false,
+        &quot;value&quot;: null,
+        &quot;description&quot;: &quot;Controls how much referrer data leaves the site.&quot;
+      }
+    ],
+    &quot;present&quot;: 0,
+    &quot;missing&quot;: [
+      {
+        &quot;name&quot;: &quot;HSTS&quot;,
+        &quot;header&quot;: &quot;strict-transport-security&quot;,
+        &quot;present&quot;: false,
+        &quot;value&quot;: null,
+        &quot;description&quot;: &quot;Forces browsers to use HTTPS after the first successful visit.&quot;
+      },
+      {
+        &quot;name&quot;: &quot;CSP&quot;,
+        &quot;header&quot;: &quot;content-security-policy&quot;,
+        &quot;present&quot;: false,
+        &quot;value&quot;: null,
+        &quot;description&quot;: &quot;Limits where scripts, frames, and other active content may load from.&quot;
+      },
+      {
+        &quot;name&quot;: &quot;XFO&quot;,
+        &quot;header&quot;: &quot;x-frame-options&quot;,
+        &quot;present&quot;: false,
+        &quot;value&quot;: null,
+        &quot;description&quot;: &quot;Reduces clickjacking risk by controlling frame embedding.&quot;
+      },
+      {
+        &quot;name&quot;: &quot;XCTO&quot;,
+        &quot;header&quot;: &quot;x-content-type-options&quot;,
+        &quot;present&quot;: false,
+        &quot;value&quot;: null,
+        &quot;description&quot;: &quot;Prevents MIME sniffing in supported browsers.&quot;
+      },
+      {
+        &quot;name&quot;: &quot;Referrer-Policy&quot;,
+        &quot;header&quot;: &quot;referrer-policy&quot;,
+        &quot;present&quot;: false,
+        &quot;value&quot;: null,
+        &quot;description&quot;: &quot;Controls how much referrer data leaves the site.&quot;
+      }
+    ],
+    &quot;exposedHeaders&quot;: [
+      {
+        &quot;header&quot;: &quot;server&quot;,
+        &quot;value&quot;: &quot;GitHub.com&quot;
+      },
+      {
+        &quot;header&quot;: &quot;via&quot;,
+        &quot;value&quot;: &quot;1.1 varnish&quot;
+      }
+    ]
+  },
+  &quot;ssl&quot;: {
+    &quot;version&quot;: &quot;TLSv1.3&quot;,
+    &quot;cipher&quot;: &quot;TLS_AES_128_GCM_SHA256&quot;,
+    &quot;issuer&quot;: {
+      &quot;countryName&quot;: &quot;US&quot;,
+      &quot;organizationName&quot;: &quot;Let&#x27;s Encrypt&quot;,
+      &quot;commonName&quot;: &quot;R12&quot;
+    },
+    &quot;subject&quot;: {
+      &quot;commonName&quot;: &quot;cybersecuritypilot.org&quot;
+    },
+    &quot;notBefore&quot;: &quot;May  1 01:24:24 2026 GMT&quot;,
+    &quot;notAfter&quot;: &quot;Jul 30 01:24:23 2026 GMT&quot;
+  },
+  &quot;vendors&quot;: [
+    {
+      &quot;name&quot;: &quot;unpkg.com&quot;,
+      &quot;type&quot;: &quot;CDN&quot;,
+      &quot;category&quot;: &quot;CDN&quot;,
+      &quot;riskLabel&quot;: &quot;Observed&quot;,
+      &quot;reason&quot;: &quot;Matched cdn pattern&quot;,
+      &quot;url&quot;: &quot;https://unpkg.com/lucide@latest&quot;
+    },
+    {
+      &quot;name&quot;: &quot;fonts.googleapis.com&quot;,
+      &quot;type&quot;: &quot;Fonts&quot;,
+      &quot;category&quot;: &quot;Fonts&quot;,
+      &quot;riskLabel&quot;: &quot;Observed&quot;,
+      &quot;reason&quot;: &quot;Matched fonts pattern&quot;,
+      &quot;url&quot;: &quot;https://fonts.googleapis.com&quot;
+    },
+    {
+      &quot;name&quot;: &quot;fonts.googleapis.com&quot;,
+      &quot;type&quot;: &quot;Fonts&quot;,
+      &quot;category&quot;: &quot;Fonts&quot;,
+      &quot;riskLabel&quot;: &quot;Observed&quot;,
+      &quot;reason&quot;: &quot;Matched fonts pattern&quot;,
+      &quot;url&quot;: &quot;https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@300;400;500;600;700;800&amp;display=swap&quot;
+    },
+    {
+      &quot;name&quot;: &quot;fonts.gstatic.com&quot;,
+      &quot;type&quot;: &quot;Fonts&quot;,
+      &quot;category&quot;: &quot;Fonts&quot;,
+      &quot;riskLabel&quot;: &quot;Observed&quot;,
+      &quot;reason&quot;: &quot;Matched fonts pattern&quot;,
+      &quot;url&quot;: &quot;https://fonts.gstatic.com&quot;
+    },
+    {
+      &quot;name&quot;: &quot;cdn.tailwindcss.com&quot;,
+      &quot;type&quot;: &quot;Unknown&quot;,
+      &quot;category&quot;: &quot;Unknown&quot;,
+      &quot;riskLabel&quot;: &quot;Watch&quot;,
+      &quot;reason&quot;: &quot;No known category pattern matched&quot;,
+      &quot;url&quot;: &quot;https://cdn.tailwindcss.com&quot;
+    },
+    {
+      &quot;name&quot;: &quot;techmore.github.io&quot;,
+      &quot;type&quot;: &quot;Unknown&quot;,
+      &quot;category&quot;: &quot;Unknown&quot;,
+      &quot;riskLabel&quot;: &quot;Watch&quot;,
+      &quot;reason&quot;: &quot;No known category pattern matched&quot;,
+      &quot;url&quot;: &quot;https://techmore.github.io/TM-NMapUI-www/&quot;
+    },
+    {
+      &quot;name&quot;: &quot;techmore.github.io&quot;,
+      &quot;type&quot;: &quot;Unknown&quot;,
+      &quot;category&quot;: &quot;Unknown&quot;,
+      &quot;riskLabel&quot;: &quot;Watch&quot;,
+      &quot;reason&quot;: &quot;No known category pattern matched&quot;,
+      &quot;url&quot;: &quot;https://techmore.github.io/tm-external-baseline/&quot;
+    }
+  ],
+  &quot;nikto&quot;: {
+    &quot;available&quot;: false,
+    &quot;status&quot;: &quot;skipped&quot;,
+    &quot;findings&quot;: [],
+    &quot;findingCount&quot;: 0
+  }
+}</pre></td></tr></tbody></table>
+  </main>
+</body>
+</html>

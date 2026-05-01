@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-01T03:00:26Z",
+  "timestamp": "2026-05-01T03:05:38Z",
   "mode": "monitoring",
   "isFirstRun": false,
   "baselineMessage": "",
@@ -13,33 +13,77 @@
     {
       "area": "DNS health",
       "status": "Pass",
-      "summary": "DNS records are monitored for additions, removals, and sensitive changes."
+      "summary": "DNS records are monitored for additions, removals, and sensitive changes.",
+      "categories": [
+        "DNS"
+      ],
+      "findingIds": [],
+      "findingCount": 0
     },
     {
       "area": "Website security headers",
       "status": "Action Needed",
-      "summary": "Browser security headers and exposed hosting headers are checked."
+      "summary": "Browser security headers and exposed hosting headers are checked.",
+      "categories": [
+        "Website",
+        "Hosting"
+      ],
+      "findingIds": [
+        "45a1d648f6f1",
+        "65ccb2cef65c",
+        "1e117f00b0b5",
+        "494a65d3913f",
+        "8c955274cc70",
+        "a7160675f47b",
+        "4a4527c1b6de"
+      ],
+      "findingCount": 7
     },
     {
       "area": "Email authentication",
       "status": "Action Needed",
-      "summary": "SPF, DKIM, DMARC, MX provider, and spoofing risk are reviewed."
+      "summary": "SPF, DKIM, DMARC, MX provider, and spoofing risk are reviewed.",
+      "categories": [
+        "Email"
+      ],
+      "findingIds": [
+        "fa0a3e943fc7",
+        "9121d4d0df7c",
+        "d8d45f74a50d"
+      ],
+      "findingCount": 3
     },
     {
       "area": "Vendor exposure",
       "status": "Watch",
-      "summary": "Third-party hosts are categorized and unknown vendors are flagged."
+      "summary": "Third-party hosts are categorized and unknown vendors are flagged.",
+      "categories": [
+        "Vendor"
+      ],
+      "findingIds": [
+        "2a89b4319f41",
+        "a61d69a450a9",
+        "0b2da65658db"
+      ],
+      "findingCount": 3
     },
     {
       "area": "External vulnerability scan",
       "status": "Pass",
-      "summary": "Nikto findings are promoted into customer-readable findings."
+      "summary": "Nikto findings are promoted into customer-readable findings.",
+      "categories": [
+        "Nikto"
+      ],
+      "findingIds": [],
+      "findingCount": 0
     }
   ],
   "findings": [
     {
       "id": "45a1d648f6f1",
       "domain": "cybersecuritypilot.org",
+      "category": "Website",
+      "baselineObservation": false,
       "title": "CSP header is missing",
       "summary": "cybersecuritypilot.org does not publish the content-security-policy header.",
       "impact": "Missing CSP can reduce browser-side protection for visitors.",
@@ -59,6 +103,8 @@
     {
       "id": "fa0a3e943fc7",
       "domain": "cybersecuritypilot.org",
+      "category": "Email",
+      "baselineObservation": false,
       "title": "DMARC record is missing",
       "summary": "cybersecuritypilot.org does not publish a DMARC policy.",
       "impact": "Mailbox providers get less guidance on how to handle spoofed mail.",
@@ -76,6 +122,8 @@
     {
       "id": "9121d4d0df7c",
       "domain": "cybersecuritypilot.org",
+      "category": "Email",
+      "baselineObservation": false,
       "title": "Email spoofing risk is high",
       "summary": "cybersecuritypilot.org is missing both SPF and DMARC.",
       "impact": "Customers, staff, or vendors may receive convincing spoofed messages that appear to come from this domain.",
@@ -159,6 +207,8 @@
     {
       "id": "65ccb2cef65c",
       "domain": "cybersecuritypilot.org",
+      "category": "Website",
+      "baselineObservation": false,
       "title": "HSTS header is missing",
       "summary": "cybersecuritypilot.org does not publish the strict-transport-security header.",
       "impact": "Missing HSTS can reduce browser-side protection for visitors.",
@@ -178,6 +228,8 @@
     {
       "id": "d8d45f74a50d",
       "domain": "cybersecuritypilot.org",
+      "category": "Email",
+      "baselineObservation": false,
       "title": "SPF record is missing",
       "summary": "cybersecuritypilot.org does not publish an SPF record.",
       "impact": "Attackers may have an easier time spoofing mail from this domain.",
@@ -193,6 +245,8 @@
     {
       "id": "1e117f00b0b5",
       "domain": "cybersecuritypilot.org",
+      "category": "Website",
+      "baselineObservation": false,
       "title": "Referrer-Policy header is missing",
       "summary": "cybersecuritypilot.org does not publish the referrer-policy header.",
       "impact": "Missing Referrer-Policy can reduce browser-side protection for visitors.",
@@ -212,6 +266,8 @@
     {
       "id": "2a89b4319f41",
       "domain": "cybersecuritypilot.org",
+      "category": "Vendor",
+      "baselineObservation": false,
       "title": "Unknown third-party vendor observed",
       "summary": "cybersecuritypilot.org loads content from cdn.tailwindcss.com, which is not categorized yet.",
       "impact": "Unreviewed third-party scripts or assets can introduce availability, privacy, or security risk.",
@@ -232,6 +288,8 @@
     {
       "id": "a61d69a450a9",
       "domain": "cybersecuritypilot.org",
+      "category": "Vendor",
+      "baselineObservation": false,
       "title": "Unknown third-party vendor observed",
       "summary": "cybersecuritypilot.org loads content from techmore.github.io, which is not categorized yet.",
       "impact": "Unreviewed third-party scripts or assets can introduce availability, privacy, or security risk.",
@@ -252,6 +310,8 @@
     {
       "id": "0b2da65658db",
       "domain": "cybersecuritypilot.org",
+      "category": "Vendor",
+      "baselineObservation": false,
       "title": "Unknown third-party vendor observed",
       "summary": "cybersecuritypilot.org loads content from techmore.github.io, which is not categorized yet.",
       "impact": "Unreviewed third-party scripts or assets can introduce availability, privacy, or security risk.",
@@ -272,6 +332,8 @@
     {
       "id": "494a65d3913f",
       "domain": "cybersecuritypilot.org",
+      "category": "Website",
+      "baselineObservation": false,
       "title": "XCTO header is missing",
       "summary": "cybersecuritypilot.org does not publish the x-content-type-options header.",
       "impact": "Missing XCTO can reduce browser-side protection for visitors.",
@@ -291,6 +353,8 @@
     {
       "id": "8c955274cc70",
       "domain": "cybersecuritypilot.org",
+      "category": "Website",
+      "baselineObservation": false,
       "title": "XFO header is missing",
       "summary": "cybersecuritypilot.org does not publish the x-frame-options header.",
       "impact": "Missing XFO can reduce browser-side protection for visitors.",
@@ -310,6 +374,8 @@
     {
       "id": "a7160675f47b",
       "domain": "cybersecuritypilot.org",
+      "category": "Hosting",
+      "baselineObservation": false,
       "title": "server header is exposed",
       "summary": "cybersecuritypilot.org exposes server: GitHub.com.",
       "impact": "Technology disclosure can help attackers fingerprint hosting or application components.",
@@ -326,6 +392,8 @@
     {
       "id": "4a4527c1b6de",
       "domain": "cybersecuritypilot.org",
+      "category": "Hosting",
+      "baselineObservation": false,
       "title": "via header is exposed",
       "summary": "cybersecuritypilot.org exposes via: 1.1 varnish.",
       "impact": "Technology disclosure can help attackers fingerprint hosting or application components.",
@@ -630,95 +698,95 @@
       "domain": "cybersecuritypilot.org",
       "type": "A",
       "value": "185.199.108.153",
-      "lastChange": "2026-05-01T03:00:26Z"
+      "lastChange": "2026-05-01T03:05:37Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "A",
       "value": "185.199.109.153",
-      "lastChange": "2026-05-01T03:00:26Z"
+      "lastChange": "2026-05-01T03:05:37Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "A",
       "value": "185.199.110.153",
-      "lastChange": "2026-05-01T03:00:26Z"
+      "lastChange": "2026-05-01T03:05:37Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "A",
       "value": "185.199.111.153",
-      "lastChange": "2026-05-01T03:00:26Z"
+      "lastChange": "2026-05-01T03:05:37Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "MX",
       "value": "1 smtp.google.com.",
-      "lastChange": "2026-05-01T03:00:26Z"
+      "lastChange": "2026-05-01T03:05:37Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "NS",
       "value": "ns1.hover.com.",
-      "lastChange": "2026-05-01T03:00:26Z"
+      "lastChange": "2026-05-01T03:05:37Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "NS",
       "value": "ns2.hover.com.",
-      "lastChange": "2026-05-01T03:00:26Z"
+      "lastChange": "2026-05-01T03:05:37Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "TXT",
       "value": "\"CSP-verification-a88fbb45fe6aec95d98c16e7872475515611af44a9267eb2c89c6b49891efcf6\"",
-      "lastChange": "2026-05-01T03:00:26Z"
+      "lastChange": "2026-05-01T03:05:37Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "TXT",
       "value": "\"google-site-verification=-F7YSQ9ZuWrJxLZM95edc8mIYfxp6YwTq87QR90RgRE\"",
-      "lastChange": "2026-05-01T03:00:26Z"
+      "lastChange": "2026-05-01T03:05:37Z"
     }
   ],
   "vendors": [
     {
       "name": "unpkg.com",
       "type": "CDN",
-      "firstSeen": "2026-05-01T03:00:26Z",
-      "lastChange": "2026-05-01T03:00:26Z",
+      "firstSeen": "2026-05-01T03:05:38Z",
+      "lastChange": "2026-05-01T03:05:38Z",
       "status": "observed",
       "siteCount": 1
     },
     {
       "name": "fonts.googleapis.com",
       "type": "Fonts",
-      "firstSeen": "2026-05-01T03:00:26Z",
-      "lastChange": "2026-05-01T03:00:26Z",
+      "firstSeen": "2026-05-01T03:05:38Z",
+      "lastChange": "2026-05-01T03:05:38Z",
       "status": "observed",
       "siteCount": 1
     },
     {
       "name": "fonts.gstatic.com",
       "type": "Fonts",
-      "firstSeen": "2026-05-01T03:00:26Z",
-      "lastChange": "2026-05-01T03:00:26Z",
+      "firstSeen": "2026-05-01T03:05:38Z",
+      "lastChange": "2026-05-01T03:05:38Z",
       "status": "observed",
       "siteCount": 1
     },
     {
       "name": "cdn.tailwindcss.com",
       "type": "Unknown",
-      "firstSeen": "2026-05-01T03:00:26Z",
-      "lastChange": "2026-05-01T03:00:26Z",
+      "firstSeen": "2026-05-01T03:05:38Z",
+      "lastChange": "2026-05-01T03:05:38Z",
       "status": "observed",
       "siteCount": 1
     },
     {
       "name": "techmore.github.io",
       "type": "Unknown",
-      "firstSeen": "2026-05-01T03:00:26Z",
-      "lastChange": "2026-05-01T03:00:26Z",
+      "firstSeen": "2026-05-01T03:05:38Z",
+      "lastChange": "2026-05-01T03:05:38Z",
       "status": "observed",
       "siteCount": 1
     }
@@ -726,11 +794,11 @@
   "sites": [
     {
       "domain": "cybersecuritypilot.org",
-      "lastChange": "2026-05-01T03:00:26Z",
+      "lastChange": "2026-05-01T03:05:37Z",
       "dnsChanges": 0,
       "vendorCount": 7,
       "status": 200,
-      "reportFile": "external_domain_baseline_20260501_030026.html"
+      "reportFile": "external_domain_baseline_20260501_030538.html"
     }
   ],
   "sections": [
@@ -913,7 +981,7 @@
   ],
   "domains": {
     "cybersecuritypilot.org": {
-      "timestamp": "2026-05-01T03:00:26Z",
+      "timestamp": "2026-05-01T03:05:37Z",
       "dns": {
         "A": [
           "185.199.108.153",
@@ -952,15 +1020,15 @@
           "x-proxy-cache": "MISS",
           "x-github-request-id": "2C5C:206406:B9537:CC56D:69F4151E",
           "accept-ranges": "bytes",
-          "age": "555",
-          "date": "Fri, 01 May 2026 03:00:26 GMT",
+          "age": "0",
+          "date": "Fri, 01 May 2026 03:05:37 GMT",
           "via": "1.1 varnish",
-          "x-served-by": "cache-ewr-kewr1740067-EWR",
+          "x-served-by": "cache-ewr-kewr1740041-EWR",
           "x-cache": "HIT",
           "x-cache-hits": "0",
-          "x-timer": "S1777604426.146556,VS0,VE1",
+          "x-timer": "S1777604738.666695,VS0,VE18",
           "vary": "Accept-Encoding",
-          "x-fastly-request-id": "6f8a75d085108b694057ec2379265d4443190d03"
+          "x-fastly-request-id": "d32cf8dbb3cd185b2832efc031f6cbf14c064f62"
         },
         "securityHeaders": {
           "HSTS": null,
@@ -1210,9 +1278,9 @@
   },
   "recentReports": [
     {
-      "date": "2026-05-01T03:00:26Z",
+      "date": "2026-05-01T03:05:38Z",
       "domains": 1,
-      "url": "external_domain_baseline_20260501_030026.html"
+      "url": "external_domain_baseline_20260501_030538.html"
     }
   ]
 }

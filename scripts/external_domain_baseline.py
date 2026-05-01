@@ -538,10 +538,13 @@ def save_history(domains: dict[str, Any]) -> None:
 
 
 def make_finding(domain: str, title: str, summary: str, impact: str, recommendation: str,
-                 severity: str, owner: str, effort: str, confidence: str, evidence: Any) -> dict[str, Any]:
+                 severity: str, owner: str, effort: str, confidence: str, evidence: Any,
+                 category: str | None = None, baseline_observation: bool = False) -> dict[str, Any]:
     return {
         "id": stable_id(domain, title, json.dumps(evidence, sort_keys=True, default=str)),
         "domain": domain,
+        "category": category or owner,
+        "baselineObservation": baseline_observation,
         "title": title,
         "summary": summary,
         "impact": impact,
@@ -572,6 +575,8 @@ def generate_findings(domains: dict[str, Any], changes: list[dict[str, Any]], is
                 "Low",
                 "High",
                 missing,
+                "Website",
+                is_first_run,
             ))
         for exposed in website.get("securityAnalysis", {}).get("exposedHeaders", []):
             findings.append(make_finding(
@@ -585,6 +590,8 @@ def generate_findings(domains: dict[str, Any], changes: list[dict[str, Any]], is
                 "Low",
                 "Medium",
                 exposed,
+                "Hosting",
+                is_first_run,
             ))
         if not email["spf"]["present"]:
             findings.append(make_finding(
@@ -598,6 +605,8 @@ def generate_findings(domains: dict[str, Any], changes: list[dict[str, Any]], is
                 "Medium",
                 "High",
                 email["mxRecords"],
+                "Email",
+                is_first_run,
             ))
         if not email["dmarc"]["present"]:
             findings.append(make_finding(
@@ -611,6 +620,8 @@ def generate_findings(domains: dict[str, Any], changes: list[dict[str, Any]], is
                 "Medium",
                 "High",
                 email["dmarc"],
+                "Email",
+                is_first_run,
             ))
         elif email["dmarc"]["policy"] == "none":
             findings.append(make_finding(
@@ -624,6 +635,8 @@ def generate_findings(domains: dict[str, Any], changes: list[dict[str, Any]], is
                 "Medium",
                 "High",
                 email["dmarc"],
+                "Email",
+                is_first_run,
             ))
         if not email["dkim"]["present"]:
             findings.append(make_finding(
@@ -637,6 +650,8 @@ def generate_findings(domains: dict[str, Any], changes: list[dict[str, Any]], is
                 "Medium",
                 "Medium",
                 email["dkim"],
+                "Email",
+                is_first_run,
             ))
         if email["spoofingRisk"] == "High":
             findings.append(make_finding(
@@ -650,6 +665,8 @@ def generate_findings(domains: dict[str, Any], changes: list[dict[str, Any]], is
                 "Medium",
                 "High",
                 email,
+                "Email",
+                is_first_run,
             ))
         for vendor in website.get("vendors", []):
             if vendor.get("category") == "Unknown":
@@ -664,6 +681,8 @@ def generate_findings(domains: dict[str, Any], changes: list[dict[str, Any]], is
                     "Low",
                     "Medium",
                     vendor,
+                    "Vendor",
+                    is_first_run,
                 ))
         nikto = website.get("nikto", {})
         for finding in nikto.get("findings", []):
@@ -678,6 +697,8 @@ def generate_findings(domains: dict[str, Any], changes: list[dict[str, Any]], is
                 "Medium",
                 "Medium",
                 finding,
+                "Nikto",
+                is_first_run,
             ))
     if not is_first_run:
         for change in changes:
@@ -693,11 +714,28 @@ def generate_findings(domains: dict[str, Any], changes: list[dict[str, Any]], is
                     "Low",
                     "High",
                     change,
+                    change["category"],
+                    False,
                 ))
     return sorted(findings, key=lambda finding: (-SEVERITY_RANK.get(finding["severity"], 0), finding["domain"], finding["title"]))
 
 
-def build_scorecard(domains: dict[str, Any], findings: list[dict[str, Any]]) -> list[dict[str, str]]:
+def scorecard_item(area: str, status: str, summary: str, categories: list[str], findings: list[dict[str, Any]]) -> dict[str, Any]:
+    related = [
+        finding["id"] for finding in findings
+        if finding.get("category") in categories or finding.get("owner") in categories
+    ]
+    return {
+        "area": area,
+        "status": status,
+        "summary": summary,
+        "categories": categories,
+        "findingIds": related,
+        "findingCount": len(related),
+    }
+
+
+def build_scorecard(domains: dict[str, Any], findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     def status_for(owner: str, high_threshold: int = 1) -> str:
         owner_findings = [finding for finding in findings if finding["owner"] == owner]
         if any(finding["severity"] in {"Critical", "High"} for finding in owner_findings):
@@ -719,11 +757,11 @@ def build_scorecard(domains: dict[str, Any], findings: list[dict[str, Any]]) -> 
     else:
         email_status = "Pass"
     return [
-        {"area": "DNS health", "status": "Action Needed" if any("MX" in f["title"] or "NS" in f["title"] for f in findings) else "Pass", "summary": "DNS records are monitored for additions, removals, and sensitive changes."},
-        {"area": "Website security headers", "status": status_for("Website"), "summary": "Browser security headers and exposed hosting headers are checked."},
-        {"area": "Email authentication", "status": email_status, "summary": "SPF, DKIM, DMARC, MX provider, and spoofing risk are reviewed."},
-        {"area": "Vendor exposure", "status": "Watch" if unknown_vendors else "Pass", "summary": "Third-party hosts are categorized and unknown vendors are flagged."},
-        {"area": "External vulnerability scan", "status": "Action Needed" if nikto_findings else "Pass", "summary": "Nikto findings are promoted into customer-readable findings."},
+        scorecard_item("DNS health", "Action Needed" if any("MX" in f["title"] or "NS" in f["title"] for f in findings) else "Pass", "DNS records are monitored for additions, removals, and sensitive changes.", ["DNS"], findings),
+        scorecard_item("Website security headers", status_for("Website"), "Browser security headers and exposed hosting headers are checked.", ["Website", "Hosting"], findings),
+        scorecard_item("Email authentication", email_status, "SPF, DKIM, DMARC, MX provider, and spoofing risk are reviewed.", ["Email"], findings),
+        scorecard_item("Vendor exposure", "Watch" if unknown_vendors else "Pass", "Third-party hosts are categorized and unknown vendors are flagged.", ["Vendor"], findings),
+        scorecard_item("External vulnerability scan", "Action Needed" if nikto_findings else "Pass", "Nikto findings are promoted into customer-readable findings.", ["Nikto"], findings),
     ]
 
 
@@ -881,6 +919,37 @@ def write_html_report(summary: dict[str, Any], report_path: Path) -> None:
             f"<td>{', '.join(html.escape(v) for v in data['dns'].get('MX', [])[:3])}</td>"
             "</tr>"
         )
+    appendix_rows = []
+    for domain, data in summary.get("domains", {}).items():
+        appendix_rows.append(
+            "<tr>"
+            f"<td>{html.escape(domain)}</td>"
+            "<td>DNS</td>"
+            f"<td><pre>{html.escape(json.dumps(data.get('dns', {}), indent=2))}</pre></td>"
+            "</tr>"
+        )
+        appendix_rows.append(
+            "<tr>"
+            f"<td>{html.escape(domain)}</td>"
+            "<td>Email health</td>"
+            f"<td><pre>{html.escape(json.dumps(data.get('email', {}), indent=2))}</pre></td>"
+            "</tr>"
+        )
+        website_evidence = {
+            "url": data.get("website", {}).get("url"),
+            "status": data.get("website", {}).get("status"),
+            "securityAnalysis": data.get("website", {}).get("securityAnalysis"),
+            "ssl": data.get("website", {}).get("ssl"),
+            "vendors": data.get("website", {}).get("vendors"),
+            "nikto": data.get("website", {}).get("nikto"),
+        }
+        appendix_rows.append(
+            "<tr>"
+            f"<td>{html.escape(domain)}</td>"
+            "<td>Website and vendors</td>"
+            f"<td><pre>{html.escape(json.dumps(website_evidence, indent=2))}</pre></td>"
+            "</tr>"
+        )
     report_path.write_text(f"""<!doctype html>
 <html lang="en">
 <head>
@@ -902,6 +971,7 @@ def write_html_report(summary: dict[str, Any], report_path: Path) -> None:
     th, td {{ padding: 13px 14px; border-bottom: 1px solid rgba(95,85,50,.14); text-align: left; vertical-align: top; }}
     th {{ color: #5f5532; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; background: rgba(238,236,216,.68); }}
     small {{ color: #5f5532; }}
+    pre {{ white-space: pre-wrap; word-break: break-word; font-size: 12px; }}
   </style>
 </head>
 <body>
@@ -926,6 +996,8 @@ def write_html_report(summary: dict[str, Any], report_path: Path) -> None:
       <thead><tr><th>Domain</th><th>Status</th><th>DNS Changes</th><th>Vendors</th><th>Public Emails</th><th>MX Records</th></tr></thead>
       <tbody>{''.join(domain_rows)}</tbody>
     </table>
+    <h2>Technical Evidence Appendix</h2>
+    <table><thead><tr><th>Domain</th><th>Evidence Type</th><th>Raw Evidence</th></tr></thead><tbody>{''.join(appendix_rows)}</tbody></table>
   </main>
 </body>
 </html>
