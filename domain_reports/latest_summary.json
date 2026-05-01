@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-05-01T02:51:12Z",
-  "mode": "baseline",
-  "isFirstRun": true,
-  "baselineMessage": "This is your baseline. Future scans will highlight changes.",
+  "timestamp": "2026-05-01T03:00:26Z",
+  "mode": "monitoring",
+  "isFirstRun": false,
+  "baselineMessage": "",
   "totalDomains": 1,
   "averageSecurityScore": 0,
   "contentChanges": 0,
@@ -21,9 +21,9 @@
       "summary": "Browser security headers and exposed hosting headers are checked."
     },
     {
-      "area": "Email security",
+      "area": "Email authentication",
       "status": "Action Needed",
-      "summary": "SPF, DMARC, DKIM signals, MX provider, and spoofing risk are reviewed."
+      "summary": "SPF, DKIM, DMARC, MX provider, and spoofing risk are reviewed."
     },
     {
       "area": "Vendor exposure",
@@ -74,7 +74,7 @@
       }
     },
     {
-      "id": "641a7833f205",
+      "id": "9121d4d0df7c",
       "domain": "cybersecuritypilot.org",
       "title": "Email spoofing risk is high",
       "summary": "cybersecuritypilot.org is missing both SPF and DMARC.",
@@ -120,6 +120,27 @@
             }
           ],
           "present": true
+        },
+        "health": {
+          "overall": "Action Needed",
+          "spf": {
+            "status": "Action Needed",
+            "label": "SPF",
+            "summary": "SPF record missing",
+            "whyItMatters": "SPF tells receiving mail servers which systems may send mail for this domain."
+          },
+          "dkim": {
+            "status": "Pass",
+            "label": "DKIM",
+            "summary": "1 selector(s) discovered",
+            "whyItMatters": "DKIM cryptographically signs outbound mail so receivers can verify message authenticity."
+          },
+          "dmarc": {
+            "status": "Action Needed",
+            "label": "DMARC",
+            "summary": "DMARC record missing",
+            "whyItMatters": "DMARC tells receivers what to do when SPF or DKIM authentication fails."
+          }
         },
         "spoofingRisk": "High",
         "discovered": [],
@@ -351,10 +372,10 @@
       }
     },
     {
-      "id": "dcd8ce22a80e",
+      "id": "9a7c7ad6d818",
       "domain": "cybersecuritypilot.org",
       "task": "Add SPF and DMARC records, then validate them with a follow-up scan.",
-      "sourceFinding": "641a7833f205",
+      "sourceFinding": "9121d4d0df7c",
       "severity": "High",
       "owner": "Email",
       "effort": "Medium",
@@ -394,6 +415,27 @@
             }
           ],
           "present": true
+        },
+        "health": {
+          "overall": "Action Needed",
+          "spf": {
+            "status": "Action Needed",
+            "label": "SPF",
+            "summary": "SPF record missing",
+            "whyItMatters": "SPF tells receiving mail servers which systems may send mail for this domain."
+          },
+          "dkim": {
+            "status": "Pass",
+            "label": "DKIM",
+            "summary": "1 selector(s) discovered",
+            "whyItMatters": "DKIM cryptographically signs outbound mail so receivers can verify message authenticity."
+          },
+          "dmarc": {
+            "status": "Action Needed",
+            "label": "DMARC",
+            "summary": "DMARC record missing",
+            "whyItMatters": "DMARC tells receivers what to do when SPF or DKIM authentication fails."
+          }
         },
         "spoofingRisk": "High",
         "discovered": [],
@@ -588,95 +630,95 @@
       "domain": "cybersecuritypilot.org",
       "type": "A",
       "value": "185.199.108.153",
-      "lastChange": "2026-05-01T02:51:11Z"
+      "lastChange": "2026-05-01T03:00:26Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "A",
       "value": "185.199.109.153",
-      "lastChange": "2026-05-01T02:51:11Z"
+      "lastChange": "2026-05-01T03:00:26Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "A",
       "value": "185.199.110.153",
-      "lastChange": "2026-05-01T02:51:11Z"
+      "lastChange": "2026-05-01T03:00:26Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "A",
       "value": "185.199.111.153",
-      "lastChange": "2026-05-01T02:51:11Z"
+      "lastChange": "2026-05-01T03:00:26Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "MX",
       "value": "1 smtp.google.com.",
-      "lastChange": "2026-05-01T02:51:11Z"
+      "lastChange": "2026-05-01T03:00:26Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "NS",
       "value": "ns1.hover.com.",
-      "lastChange": "2026-05-01T02:51:11Z"
+      "lastChange": "2026-05-01T03:00:26Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "NS",
       "value": "ns2.hover.com.",
-      "lastChange": "2026-05-01T02:51:11Z"
+      "lastChange": "2026-05-01T03:00:26Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "TXT",
       "value": "\"CSP-verification-a88fbb45fe6aec95d98c16e7872475515611af44a9267eb2c89c6b49891efcf6\"",
-      "lastChange": "2026-05-01T02:51:11Z"
+      "lastChange": "2026-05-01T03:00:26Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "TXT",
       "value": "\"google-site-verification=-F7YSQ9ZuWrJxLZM95edc8mIYfxp6YwTq87QR90RgRE\"",
-      "lastChange": "2026-05-01T02:51:11Z"
+      "lastChange": "2026-05-01T03:00:26Z"
     }
   ],
   "vendors": [
     {
       "name": "unpkg.com",
       "type": "CDN",
-      "firstSeen": "2026-05-01T02:51:12Z",
-      "lastChange": "2026-05-01T02:51:12Z",
+      "firstSeen": "2026-05-01T03:00:26Z",
+      "lastChange": "2026-05-01T03:00:26Z",
       "status": "observed",
       "siteCount": 1
     },
     {
       "name": "fonts.googleapis.com",
       "type": "Fonts",
-      "firstSeen": "2026-05-01T02:51:12Z",
-      "lastChange": "2026-05-01T02:51:12Z",
+      "firstSeen": "2026-05-01T03:00:26Z",
+      "lastChange": "2026-05-01T03:00:26Z",
       "status": "observed",
       "siteCount": 1
     },
     {
       "name": "fonts.gstatic.com",
       "type": "Fonts",
-      "firstSeen": "2026-05-01T02:51:12Z",
-      "lastChange": "2026-05-01T02:51:12Z",
+      "firstSeen": "2026-05-01T03:00:26Z",
+      "lastChange": "2026-05-01T03:00:26Z",
       "status": "observed",
       "siteCount": 1
     },
     {
       "name": "cdn.tailwindcss.com",
       "type": "Unknown",
-      "firstSeen": "2026-05-01T02:51:12Z",
-      "lastChange": "2026-05-01T02:51:12Z",
+      "firstSeen": "2026-05-01T03:00:26Z",
+      "lastChange": "2026-05-01T03:00:26Z",
       "status": "observed",
       "siteCount": 1
     },
     {
       "name": "techmore.github.io",
       "type": "Unknown",
-      "firstSeen": "2026-05-01T02:51:12Z",
-      "lastChange": "2026-05-01T02:51:12Z",
+      "firstSeen": "2026-05-01T03:00:26Z",
+      "lastChange": "2026-05-01T03:00:26Z",
       "status": "observed",
       "siteCount": 1
     }
@@ -684,11 +726,11 @@
   "sites": [
     {
       "domain": "cybersecuritypilot.org",
-      "lastChange": "2026-05-01T02:51:11Z",
-      "dnsChanges": 4,
+      "lastChange": "2026-05-01T03:00:26Z",
+      "dnsChanges": 0,
       "vendorCount": 7,
       "status": 200,
-      "reportFile": "external_domain_baseline_20260501_025112.html"
+      "reportFile": "external_domain_baseline_20260501_030026.html"
     }
   ],
   "sections": [
@@ -815,8 +857,8 @@
     },
     {
       "id": "email",
-      "title": "Domain Email Enumeration",
-      "summary": "0 public emails; MX present",
+      "title": "Email Authentication Health",
+      "summary": "Action Needed: SPF Action Needed, DKIM Pass, DMARC Action Needed",
       "items": [
         {
           "label": "MX provider",
@@ -824,11 +866,15 @@
         },
         {
           "label": "SPF",
-          "value": "Missing"
+          "value": "SPF record missing"
+        },
+        {
+          "label": "DKIM",
+          "value": "1 selector(s) discovered"
         },
         {
           "label": "DMARC",
-          "value": "missing"
+          "value": "DMARC record missing"
         },
         {
           "label": "Spoofing risk",
@@ -867,7 +913,7 @@
   ],
   "domains": {
     "cybersecuritypilot.org": {
-      "timestamp": "2026-05-01T02:51:11Z",
+      "timestamp": "2026-05-01T03:00:26Z",
       "dns": {
         "A": [
           "185.199.108.153",
@@ -906,15 +952,15 @@
           "x-proxy-cache": "MISS",
           "x-github-request-id": "2C5C:206406:B9537:CC56D:69F4151E",
           "accept-ranges": "bytes",
-          "age": "0",
-          "date": "Fri, 01 May 2026 02:51:11 GMT",
+          "age": "555",
+          "date": "Fri, 01 May 2026 03:00:26 GMT",
           "via": "1.1 varnish",
-          "x-served-by": "cache-ewr-kewr1740098-EWR",
-          "x-cache": "MISS",
+          "x-served-by": "cache-ewr-kewr1740067-EWR",
+          "x-cache": "HIT",
           "x-cache-hits": "0",
-          "x-timer": "S1777603871.373161,VS0,VE29",
+          "x-timer": "S1777604426.146556,VS0,VE1",
           "vary": "Accept-Encoding",
-          "x-fastly-request-id": "ae379ce269e69d1109ae367c41d2d5eacd7123a5"
+          "x-fastly-request-id": "6f8a75d085108b694057ec2379265d4443190d03"
         },
         "securityHeaders": {
           "HSTS": null,
@@ -1126,6 +1172,27 @@
           ],
           "present": true
         },
+        "health": {
+          "overall": "Action Needed",
+          "spf": {
+            "status": "Action Needed",
+            "label": "SPF",
+            "summary": "SPF record missing",
+            "whyItMatters": "SPF tells receiving mail servers which systems may send mail for this domain."
+          },
+          "dkim": {
+            "status": "Pass",
+            "label": "DKIM",
+            "summary": "1 selector(s) discovered",
+            "whyItMatters": "DKIM cryptographically signs outbound mail so receivers can verify message authenticity."
+          },
+          "dmarc": {
+            "status": "Action Needed",
+            "label": "DMARC",
+            "summary": "DMARC record missing",
+            "whyItMatters": "DMARC tells receivers what to do when SPF or DKIM authentication fails."
+          }
+        },
         "spoofingRisk": "High",
         "discovered": [],
         "commonAliases": [
@@ -1143,9 +1210,9 @@
   },
   "recentReports": [
     {
-      "date": "2026-05-01T02:51:12Z",
+      "date": "2026-05-01T03:00:26Z",
       "domains": 1,
-      "url": "external_domain_baseline_20260501_025112.html"
+      "url": "external_domain_baseline_20260501_030026.html"
     }
   ]
 }

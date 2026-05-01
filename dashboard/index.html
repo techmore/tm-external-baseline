@@ -539,7 +539,7 @@
       <div>
         <div class="eyebrow">Public attack surface monitoring</div>
         <h1>Your domains, scanned the way outsiders see them.</h1>
-        <p class="lede">This homepage is powered by a live self-baseline: DNS, website status, security headers, vendors, Nikto exposure checks, and public email enumeration.</p>
+        <p class="lede">This homepage is powered by a live self-baseline: DNS, website status, security headers, vendors, Nikto exposure checks, and SPF, DKIM, and DMARC email health.</p>
         <div class="hero-actions">
           <a class="button" id="latestReportLink" href="domain_reports/latest_summary.json">View latest report</a>
           <a class="button ghost" id="downloadReportLink" href="domain_reports/latest_summary.json" download>Download report</a>
@@ -556,7 +556,7 @@
           <strong>target</strong> domains.txt or --domain example.com<br>
           <strong>collect</strong> DNS A AAAA MX NS TXT CAA<br>
           <strong>check</strong> HTTP headers vendors TLS Nikto<br>
-          <strong>enumerate</strong> public emails + common aliases<br>
+          <strong>email</strong> SPF DKIM DMARC MX spoofing risk<br>
           <span>write</span> domain_reports/latest_summary.json
         </div>
       </aside>
@@ -851,7 +851,7 @@
         { id: "dns", title: "DNS Records", summary: "Run the baseline to populate DNS records.", items: [] },
         { id: "website", title: "Website Status, Headers, Vendors", summary: "Run the baseline to populate website posture.", items: [] },
         { id: "nikto", title: "Nikto Exposure Scan", summary: "Run the baseline to populate Nikto findings.", items: [] },
-        { id: "email", title: "Domain Email Enumeration", summary: "Run the baseline to populate email exposure.", items: [] }
+        { id: "email", title: "Email Authentication Health", summary: "Run the baseline to populate SPF, DKIM, and DMARC checks.", items: [] }
       ];
       const sections = data.sections && data.sections.length ? data.sections : fallbackSections;
       document.getElementById("reports").innerHTML = sections.map((section) => `

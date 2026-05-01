@@ -296,6 +296,10 @@ def enumerate_emails(domain: str, body: str, mx_records: list[str]) -> dict[str,
         spoofing_risk = "High"
     elif not dmarc_records or dmarc_policy == "none":
         spoofing_risk = "Medium"
+    spf_status = "Pass" if spf_records else "Action Needed"
+    dmarc_status = "Pass" if dmarc_policy in {"quarantine", "reject"} else ("Watch" if dmarc_policy == "none" else "Action Needed")
+    dkim_status = "Pass" if dkim_records else "Watch"
+    overall_status = "Action Needed" if "Action Needed" in {spf_status, dmarc_status} else ("Watch" if "Watch" in {spf_status, dmarc_status, dkim_status} else "Pass")
     return {
         "mxPresent": bool(mx_records),
         "mxRecords": mx_records,
@@ -303,6 +307,27 @@ def enumerate_emails(domain: str, body: str, mx_records: list[str]) -> dict[str,
         "spf": {"present": bool(spf_records), "records": spf_records, "valid": bool(spf_records)},
         "dmarc": {"present": bool(dmarc_records), "records": dmarc_records, "policy": dmarc_policy},
         "dkim": {"selectorsChecked": list(COMMON_DKIM_SELECTORS), "records": dkim_records, "present": bool(dkim_records)},
+        "health": {
+            "overall": overall_status,
+            "spf": {
+                "status": spf_status,
+                "label": "SPF",
+                "summary": "SPF record found" if spf_records else "SPF record missing",
+                "whyItMatters": "SPF tells receiving mail servers which systems may send mail for this domain.",
+            },
+            "dkim": {
+                "status": dkim_status,
+                "label": "DKIM",
+                "summary": f"{len(dkim_records)} selector(s) discovered" if dkim_records else "No common DKIM selectors discovered",
+                "whyItMatters": "DKIM cryptographically signs outbound mail so receivers can verify message authenticity.",
+            },
+            "dmarc": {
+                "status": dmarc_status,
+                "label": "DMARC",
+                "summary": f"DMARC policy: {dmarc_policy}" if dmarc_records else "DMARC record missing",
+                "whyItMatters": "DMARC tells receivers what to do when SPF or DKIM authentication fails.",
+            },
+        },
         "spoofingRisk": spoofing_risk,
         "discovered": discovered,
         "commonAliases": aliases,
@@ -376,12 +401,13 @@ def build_report_sections(domain: str, data: dict[str, Any]) -> list[dict[str, A
         },
         {
             "id": "email",
-            "title": "Domain Email Enumeration",
-            "summary": f"{email['totalPublicEmails']} public emails; MX {'present' if email['mxPresent'] else 'missing'}",
+            "title": "Email Authentication Health",
+            "summary": f"{email['health']['overall']}: SPF {email['health']['spf']['status']}, DKIM {email['health']['dkim']['status']}, DMARC {email['health']['dmarc']['status']}",
             "items": [
                 {"label": "MX provider", "value": email["mxProvider"]},
-                {"label": "SPF", "value": "Present" if email["spf"]["present"] else "Missing"},
-                {"label": "DMARC", "value": email["dmarc"]["policy"]},
+                {"label": "SPF", "value": email["health"]["spf"]["summary"]},
+                {"label": "DKIM", "value": email["health"]["dkim"]["summary"]},
+                {"label": "DMARC", "value": email["health"]["dmarc"]["summary"]},
                 {"label": "Spoofing risk", "value": email["spoofingRisk"]},
                 *[{"label": "Public email", "value": value} for value in email["discovered"]],
                 *[{"label": "Common alias", "value": value} for value in email["commonAliases"]],
@@ -599,6 +625,19 @@ def generate_findings(domains: dict[str, Any], changes: list[dict[str, Any]], is
                 "High",
                 email["dmarc"],
             ))
+        if not email["dkim"]["present"]:
+            findings.append(make_finding(
+                domain,
+                "DKIM was not discovered",
+                f"{domain} did not expose DKIM records for the common selectors checked.",
+                "DKIM may still be configured with a custom selector, but undiscovered DKIM makes email authentication harder to verify externally.",
+                "Confirm the active DKIM selector with the mail provider and publish or document the selector used for outbound mail.",
+                "Medium" if email["mxPresent"] else "Low",
+                "Email",
+                "Medium",
+                "Medium",
+                email["dkim"],
+            ))
         if email["spoofingRisk"] == "High":
             findings.append(make_finding(
                 domain,
@@ -669,10 +708,20 @@ def build_scorecard(domains: dict[str, Any], findings: list[dict[str, Any]]) -> 
 
     nikto_findings = [finding for finding in findings if "Nikto" in finding["title"]]
     unknown_vendors = [finding for finding in findings if finding["owner"] == "Vendor"]
+    email_statuses = [
+        data.get("email", {}).get("health", {}).get("overall", "Watch")
+        for data in domains.values()
+    ]
+    if "Action Needed" in email_statuses:
+        email_status = "Action Needed"
+    elif "Watch" in email_statuses:
+        email_status = "Watch"
+    else:
+        email_status = "Pass"
     return [
         {"area": "DNS health", "status": "Action Needed" if any("MX" in f["title"] or "NS" in f["title"] for f in findings) else "Pass", "summary": "DNS records are monitored for additions, removals, and sensitive changes."},
         {"area": "Website security headers", "status": status_for("Website"), "summary": "Browser security headers and exposed hosting headers are checked."},
-        {"area": "Email security", "status": status_for("Email"), "summary": "SPF, DMARC, DKIM signals, MX provider, and spoofing risk are reviewed."},
+        {"area": "Email authentication", "status": email_status, "summary": "SPF, DKIM, DMARC, MX provider, and spoofing risk are reviewed."},
         {"area": "Vendor exposure", "status": "Watch" if unknown_vendors else "Pass", "summary": "Third-party hosts are categorized and unknown vendors are flagged."},
         {"area": "External vulnerability scan", "status": "Action Needed" if nikto_findings else "Pass", "summary": "Nikto findings are promoted into customer-readable findings."},
     ]

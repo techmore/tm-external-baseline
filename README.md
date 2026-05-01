@@ -10,7 +10,7 @@ The tool runs locally, stores history locally, and produces a lightweight websit
 - Website status, redirects, TLS, headers, and third-party vendors
 - Nikto web exposure findings when `nikto` is installed
 - Domain email exposure from public pages plus common mailbox aliases
-- SPF, DMARC, DKIM selector discovery, MX provider, and spoofing risk
+- SPF, DKIM selector discovery, DMARC policy strength, MX provider, and spoofing risk
 - Change history between scans
 - Plain-English findings with impact, recommendation, confidence, owner, severity, and effort
 - Customer scorecards using `Pass`, `Watch`, and `Action Needed`
@@ -62,7 +62,7 @@ Each scan generates:
 - Customer scorecard
 - Plain-English findings
 - Before/after change timeline
-- Email security summary
+- Email authentication health for SPF, DKIM, and DMARC
 - Vendor risk labels
 - Remediation checklist
 - HTML report suitable for browser print-to-PDF
