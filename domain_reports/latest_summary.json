@@ -1,0 +1,510 @@
+{
+  "timestamp": "2026-05-01T02:35:11Z",
+  "totalDomains": 1,
+  "averageSecurityScore": 0,
+  "contentChanges": 0,
+  "dnsChanges": 0,
+  "newVendors": 6,
+  "criticalChanges": [],
+  "vendorTypes": {
+    "Analytics": 0,
+    "Advertising": 0,
+    "Social": 0,
+    "CDN": 1,
+    "Libraries": 0,
+    "Other": 5
+  },
+  "securityHeaders": {
+    "HSTS": 0,
+    "CSP": 0,
+    "XFO": 0,
+    "XCTO": 0,
+    "Referrer-Policy": 0
+  },
+  "recentChanges": [],
+  "dnsRecords": [
+    {
+      "domain": "cybersecuritypilot.org",
+      "type": "A",
+      "value": "185.199.108.153",
+      "lastChange": "2026-05-01T02:33:41Z"
+    },
+    {
+      "domain": "cybersecuritypilot.org",
+      "type": "A",
+      "value": "185.199.109.153",
+      "lastChange": "2026-05-01T02:33:41Z"
+    },
+    {
+      "domain": "cybersecuritypilot.org",
+      "type": "A",
+      "value": "185.199.110.153",
+      "lastChange": "2026-05-01T02:33:41Z"
+    },
+    {
+      "domain": "cybersecuritypilot.org",
+      "type": "A",
+      "value": "185.199.111.153",
+      "lastChange": "2026-05-01T02:33:41Z"
+    },
+    {
+      "domain": "cybersecuritypilot.org",
+      "type": "MX",
+      "value": "1 smtp.google.com.",
+      "lastChange": "2026-05-01T02:33:41Z"
+    },
+    {
+      "domain": "cybersecuritypilot.org",
+      "type": "NS",
+      "value": "ns1.hover.com.",
+      "lastChange": "2026-05-01T02:33:41Z"
+    },
+    {
+      "domain": "cybersecuritypilot.org",
+      "type": "NS",
+      "value": "ns2.hover.com.",
+      "lastChange": "2026-05-01T02:33:41Z"
+    },
+    {
+      "domain": "cybersecuritypilot.org",
+      "type": "TXT",
+      "value": "\"CSP-verification-a88fbb45fe6aec95d98c16e7872475515611af44a9267eb2c89c6b49891efcf6\"",
+      "lastChange": "2026-05-01T02:33:41Z"
+    },
+    {
+      "domain": "cybersecuritypilot.org",
+      "type": "TXT",
+      "value": "\"google-site-verification=-F7YSQ9ZuWrJxLZM95edc8mIYfxp6YwTq87QR90RgRE\"",
+      "lastChange": "2026-05-01T02:33:41Z"
+    }
+  ],
+  "vendors": [
+    {
+      "name": "unpkg.com",
+      "type": "CDN",
+      "firstSeen": "2026-05-01T02:35:11Z",
+      "lastChange": "2026-05-01T02:35:11Z",
+      "status": "observed",
+      "siteCount": 1
+    },
+    {
+      "name": "cdn.tailwindcss.com",
+      "type": "Other",
+      "firstSeen": "2026-05-01T02:35:11Z",
+      "lastChange": "2026-05-01T02:35:11Z",
+      "status": "observed",
+      "siteCount": 1
+    },
+    {
+      "name": "fonts.googleapis.com",
+      "type": "Other",
+      "firstSeen": "2026-05-01T02:35:11Z",
+      "lastChange": "2026-05-01T02:35:11Z",
+      "status": "observed",
+      "siteCount": 1
+    },
+    {
+      "name": "fonts.gstatic.com",
+      "type": "Other",
+      "firstSeen": "2026-05-01T02:35:11Z",
+      "lastChange": "2026-05-01T02:35:11Z",
+      "status": "observed",
+      "siteCount": 1
+    },
+    {
+      "name": "techmore.github.io",
+      "type": "Other",
+      "firstSeen": "2026-05-01T02:35:11Z",
+      "lastChange": "2026-05-01T02:35:11Z",
+      "status": "observed",
+      "siteCount": 1
+    }
+  ],
+  "sites": [
+    {
+      "domain": "cybersecuritypilot.org",
+      "lastChange": "2026-05-01T02:33:41Z",
+      "dnsChanges": 0,
+      "vendorCount": 6,
+      "status": 200,
+      "reportFile": "external_domain_baseline_20260501_023511.html"
+    }
+  ],
+  "sections": [
+    {
+      "id": "dns",
+      "title": "DNS Records",
+      "summary": "9 records observed",
+      "items": [
+        {
+          "label": "A",
+          "value": "185.199.108.153"
+        },
+        {
+          "label": "A",
+          "value": "185.199.109.153"
+        },
+        {
+          "label": "A",
+          "value": "185.199.110.153"
+        },
+        {
+          "label": "A",
+          "value": "185.199.111.153"
+        },
+        {
+          "label": "MX",
+          "value": "1 smtp.google.com."
+        },
+        {
+          "label": "NS",
+          "value": "ns1.hover.com."
+        },
+        {
+          "label": "NS",
+          "value": "ns2.hover.com."
+        },
+        {
+          "label": "TXT",
+          "value": "\"CSP-verification-a88fbb45fe6aec95d98c16e7872475515611af44a9267eb2c89c6b49891efcf6\""
+        },
+        {
+          "label": "TXT",
+          "value": "\"google-site-verification=-F7YSQ9ZuWrJxLZM95edc8mIYfxp6YwTq87QR90RgRE\""
+        }
+      ]
+    },
+    {
+      "id": "website",
+      "title": "Website Status, Headers, Vendors",
+      "summary": "HTTP 200 with 6 third-party hosts",
+      "items": [
+        {
+          "label": "Final URL",
+          "value": "https://cybersecuritypilot.org"
+        },
+        {
+          "label": "HTTP status",
+          "value": 200
+        },
+        {
+          "label": "TLS",
+          "value": "TLSv1.3"
+        },
+        {
+          "label": "HSTS",
+          "value": "Missing"
+        },
+        {
+          "label": "CSP",
+          "value": "Missing"
+        },
+        {
+          "label": "XFO",
+          "value": "Missing"
+        },
+        {
+          "label": "XCTO",
+          "value": "Missing"
+        },
+        {
+          "label": "Referrer-Policy",
+          "value": "Missing"
+        },
+        {
+          "label": "CDN",
+          "value": "unpkg.com - https://unpkg.com/lucide@latest"
+        },
+        {
+          "label": "Other",
+          "value": "cdn.tailwindcss.com - https://cdn.tailwindcss.com"
+        },
+        {
+          "label": "Other",
+          "value": "fonts.googleapis.com - https://fonts.googleapis.com"
+        },
+        {
+          "label": "Other",
+          "value": "fonts.googleapis.com - https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&display=swap"
+        },
+        {
+          "label": "Other",
+          "value": "fonts.gstatic.com - https://fonts.gstatic.com"
+        },
+        {
+          "label": "Other",
+          "value": "techmore.github.io - https://techmore.github.io/TM-NMapUI-www/"
+        }
+      ]
+    },
+    {
+      "id": "nikto",
+      "title": "Nikto Exposure Scan",
+      "summary": "0 findings",
+      "items": [
+        {
+          "label": "Status",
+          "value": "completed"
+        }
+      ]
+    },
+    {
+      "id": "email",
+      "title": "Domain Email Enumeration",
+      "summary": "0 public emails; MX present",
+      "items": [
+        {
+          "label": "Common alias",
+          "value": "admin@cybersecuritypilot.org"
+        },
+        {
+          "label": "Common alias",
+          "value": "contact@cybersecuritypilot.org"
+        },
+        {
+          "label": "Common alias",
+          "value": "hello@cybersecuritypilot.org"
+        },
+        {
+          "label": "Common alias",
+          "value": "info@cybersecuritypilot.org"
+        },
+        {
+          "label": "Common alias",
+          "value": "security@cybersecuritypilot.org"
+        },
+        {
+          "label": "Common alias",
+          "value": "support@cybersecuritypilot.org"
+        },
+        {
+          "label": "Common alias",
+          "value": "webmaster@cybersecuritypilot.org"
+        }
+      ]
+    }
+  ],
+  "domains": {
+    "cybersecuritypilot.org": {
+      "timestamp": "2026-05-01T02:33:41Z",
+      "dns": {
+        "A": [
+          "185.199.108.153",
+          "185.199.109.153",
+          "185.199.110.153",
+          "185.199.111.153"
+        ],
+        "AAAA": [],
+        "MX": [
+          "1 smtp.google.com."
+        ],
+        "NS": [
+          "ns1.hover.com.",
+          "ns2.hover.com."
+        ],
+        "TXT": [
+          "\"CSP-verification-a88fbb45fe6aec95d98c16e7872475515611af44a9267eb2c89c6b49891efcf6\"",
+          "\"google-site-verification=-F7YSQ9ZuWrJxLZM95edc8mIYfxp6YwTq87QR90RgRE\""
+        ],
+        "CAA": []
+      },
+      "website": {
+        "url": "https://cybersecuritypilot.org",
+        "status": 200,
+        "error": null,
+        "headers": {
+          "connection": "close",
+          "content-length": "21490",
+          "server": "GitHub.com",
+          "content-type": "text/html; charset=utf-8",
+          "last-modified": "Fri, 01 May 2026 02:04:45 GMT",
+          "access-control-allow-origin": "*",
+          "etag": "\"69f40a3d-53f2\"",
+          "expires": "Fri, 01 May 2026 02:41:56 GMT",
+          "cache-control": "max-age=600",
+          "x-proxy-cache": "MISS",
+          "x-github-request-id": "458A:28A82C:95B02:A3AC2:69F4109C",
+          "accept-ranges": "bytes",
+          "date": "Fri, 01 May 2026 02:33:41 GMT",
+          "via": "1.1 varnish",
+          "age": "105",
+          "x-served-by": "cache-ewr-kewr1740070-EWR",
+          "x-cache": "HIT",
+          "x-cache-hits": "1",
+          "x-timer": "S1777602821.402819,VS0,VE7",
+          "vary": "Accept-Encoding",
+          "x-fastly-request-id": "0f2197173a8d2af13a4827ee2884d19b99246952"
+        },
+        "securityHeaders": {
+          "HSTS": null,
+          "CSP": null,
+          "XFO": null,
+          "XCTO": null,
+          "Referrer-Policy": null
+        },
+        "securityAnalysis": {
+          "checks": [
+            {
+              "name": "HSTS",
+              "header": "strict-transport-security",
+              "present": false,
+              "value": null,
+              "description": "Forces browsers to use HTTPS after the first successful visit."
+            },
+            {
+              "name": "CSP",
+              "header": "content-security-policy",
+              "present": false,
+              "value": null,
+              "description": "Limits where scripts, frames, and other active content may load from."
+            },
+            {
+              "name": "XFO",
+              "header": "x-frame-options",
+              "present": false,
+              "value": null,
+              "description": "Reduces clickjacking risk by controlling frame embedding."
+            },
+            {
+              "name": "XCTO",
+              "header": "x-content-type-options",
+              "present": false,
+              "value": null,
+              "description": "Prevents MIME sniffing in supported browsers."
+            },
+            {
+              "name": "Referrer-Policy",
+              "header": "referrer-policy",
+              "present": false,
+              "value": null,
+              "description": "Controls how much referrer data leaves the site."
+            }
+          ],
+          "present": 0,
+          "missing": [
+            {
+              "name": "HSTS",
+              "header": "strict-transport-security",
+              "present": false,
+              "value": null,
+              "description": "Forces browsers to use HTTPS after the first successful visit."
+            },
+            {
+              "name": "CSP",
+              "header": "content-security-policy",
+              "present": false,
+              "value": null,
+              "description": "Limits where scripts, frames, and other active content may load from."
+            },
+            {
+              "name": "XFO",
+              "header": "x-frame-options",
+              "present": false,
+              "value": null,
+              "description": "Reduces clickjacking risk by controlling frame embedding."
+            },
+            {
+              "name": "XCTO",
+              "header": "x-content-type-options",
+              "present": false,
+              "value": null,
+              "description": "Prevents MIME sniffing in supported browsers."
+            },
+            {
+              "name": "Referrer-Policy",
+              "header": "referrer-policy",
+              "present": false,
+              "value": null,
+              "description": "Controls how much referrer data leaves the site."
+            }
+          ],
+          "exposedHeaders": [
+            {
+              "header": "server",
+              "value": "GitHub.com"
+            },
+            {
+              "header": "via",
+              "value": "1.1 varnish"
+            }
+          ]
+        },
+        "ssl": {
+          "version": "TLSv1.3",
+          "cipher": "TLS_AES_128_GCM_SHA256",
+          "issuer": {
+            "countryName": "US",
+            "organizationName": "Let's Encrypt",
+            "commonName": "R12"
+          },
+          "subject": {
+            "commonName": "cybersecuritypilot.org"
+          },
+          "notBefore": "May  1 01:24:24 2026 GMT",
+          "notAfter": "Jul 30 01:24:23 2026 GMT"
+        },
+        "vendors": [
+          {
+            "name": "unpkg.com",
+            "type": "CDN",
+            "url": "https://unpkg.com/lucide@latest"
+          },
+          {
+            "name": "cdn.tailwindcss.com",
+            "type": "Other",
+            "url": "https://cdn.tailwindcss.com"
+          },
+          {
+            "name": "fonts.googleapis.com",
+            "type": "Other",
+            "url": "https://fonts.googleapis.com"
+          },
+          {
+            "name": "fonts.googleapis.com",
+            "type": "Other",
+            "url": "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&display=swap"
+          },
+          {
+            "name": "fonts.gstatic.com",
+            "type": "Other",
+            "url": "https://fonts.gstatic.com"
+          },
+          {
+            "name": "techmore.github.io",
+            "type": "Other",
+            "url": "https://techmore.github.io/TM-NMapUI-www/"
+          }
+        ],
+        "nikto": {
+          "available": true,
+          "status": "completed",
+          "exitCode": 1,
+          "findings": [],
+          "findingCount": 0,
+          "raw": "Command '['nikto', '-h', 'https://cybersecuritypilot.org', '-nointeractive', '-ask', 'no']' timed out after 90 seconds"
+        }
+      },
+      "email": {
+        "mxPresent": true,
+        "discovered": [],
+        "commonAliases": [
+          "admin@cybersecuritypilot.org",
+          "contact@cybersecuritypilot.org",
+          "hello@cybersecuritypilot.org",
+          "info@cybersecuritypilot.org",
+          "security@cybersecuritypilot.org",
+          "support@cybersecuritypilot.org",
+          "webmaster@cybersecuritypilot.org"
+        ],
+        "totalPublicEmails": 0
+      }
+    }
+  },
+  "recentReports": [
+    {
+      "date": "2026-05-01T02:35:11Z",
+      "domains": 1,
+      "url": "external_domain_baseline_20260501_023511.html"
+    }
+  ]
+}

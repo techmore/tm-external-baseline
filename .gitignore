@@ -1,0 +1,7 @@
+.DS_Store
+.venv/
+__pycache__/
+*.pyc
+domain_reports/external_domain_history.json
+domain_reports/external_domain_baseline_*.html
+!domain_reports/external_domain_baseline_20260501_023511.html
