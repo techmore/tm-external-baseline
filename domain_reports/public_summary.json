@@ -1,0 +1,416 @@
+{
+  "timestamp": "2026-05-05T02:47:23Z",
+  "mode": "monitoring",
+  "isFirstRun": false,
+  "baselineMessage": "",
+  "totalDomains": 1,
+  "averageSecurityScore": 0,
+  "contentChanges": 0,
+  "dnsChanges": 0,
+  "newVendors": 7,
+  "scorecard": [
+    {
+      "area": "DNS health",
+      "status": "Pass",
+      "summary": "DNS records are monitored for additions, removals, and sensitive changes.",
+      "categories": [
+        "DNS"
+      ],
+      "findingIds": [],
+      "findingCount": 0
+    },
+    {
+      "area": "Website security headers",
+      "status": "Action Needed",
+      "summary": "Browser security headers and exposed hosting headers are checked.",
+      "categories": [
+        "Website",
+        "Hosting"
+      ],
+      "findingIds": [
+        "45a1d648f6f1",
+        "65ccb2cef65c",
+        "1e117f00b0b5",
+        "494a65d3913f",
+        "8c955274cc70",
+        "a7160675f47b",
+        "4a4527c1b6de"
+      ],
+      "findingCount": 7
+    },
+    {
+      "area": "Email authentication",
+      "status": "Action Needed",
+      "summary": "SPF, DKIM, DMARC, MX provider, and spoofing risk are reviewed.",
+      "categories": [
+        "Email"
+      ],
+      "findingIds": [
+        "fa0a3e943fc7",
+        "9121d4d0df7c",
+        "d8d45f74a50d"
+      ],
+      "findingCount": 3
+    },
+    {
+      "area": "Vendor exposure",
+      "status": "Watch",
+      "summary": "Third-party hosts are categorized and unknown vendors are flagged.",
+      "categories": [
+        "Vendor"
+      ],
+      "findingIds": [
+        "2a89b4319f41",
+        "a61d69a450a9",
+        "0b2da65658db"
+      ],
+      "findingCount": 3
+    },
+    {
+      "area": "External vulnerability scan",
+      "status": "Pass",
+      "summary": "Nikto findings are promoted into customer-readable findings.",
+      "categories": [
+        "Nikto"
+      ],
+      "findingIds": [],
+      "findingCount": 0
+    }
+  ],
+  "vendorTypes": {
+    "Analytics": 0,
+    "Advertising": 0,
+    "Social": 0,
+    "Fonts": 3,
+    "Payment": 0,
+    "Marketing": 0,
+    "CDN": 1,
+    "Libraries": 0,
+    "Unknown": 3
+  },
+  "securityHeaders": {
+    "HSTS": 0,
+    "CSP": 0,
+    "XFO": 0,
+    "XCTO": 0,
+    "Referrer-Policy": 0
+  },
+  "recentReports": [
+    {
+      "date": "2026-05-05T02:47:23Z",
+      "domains": 1,
+      "url": "external_domain_baseline_20260505_024723.html"
+    }
+  ],
+  "sites": [
+    {
+      "domain": "cybersecuritypilot.org",
+      "status": 200,
+      "dnsChanges": 0,
+      "vendorCount": 7
+    }
+  ],
+  "findings": [
+    {
+      "id": "45a1d648f6f1",
+      "domain": "cybersecuritypilot.org",
+      "category": "Website",
+      "baselineObservation": false,
+      "title": "CSP header is missing",
+      "summary": "cybersecuritypilot.org does not publish the content-security-policy header.",
+      "impact": "Missing CSP can reduce browser-side protection for visitors.",
+      "recommendation": "Add a content-security-policy header at the web server, CDN, or hosting layer.",
+      "severity": "High",
+      "owner": "Website",
+      "effort": "Low",
+      "confidence": "High"
+    },
+    {
+      "id": "fa0a3e943fc7",
+      "domain": "cybersecuritypilot.org",
+      "category": "Email",
+      "baselineObservation": false,
+      "title": "DMARC record is missing",
+      "summary": "cybersecuritypilot.org does not publish a DMARC policy.",
+      "impact": "Mailbox providers get less guidance on how to handle spoofed mail.",
+      "recommendation": "Publish a _dmarc TXT record, starting with p=none for monitoring and moving toward quarantine or reject.",
+      "severity": "High",
+      "owner": "Email",
+      "effort": "Medium",
+      "confidence": "High"
+    },
+    {
+      "id": "9121d4d0df7c",
+      "domain": "cybersecuritypilot.org",
+      "category": "Email",
+      "baselineObservation": false,
+      "title": "Email spoofing risk is high",
+      "summary": "cybersecuritypilot.org is missing both SPF and DMARC.",
+      "impact": "Customers, staff, or vendors may receive convincing spoofed messages that appear to come from this domain.",
+      "recommendation": "Add SPF and DMARC records, then validate them with a follow-up scan.",
+      "severity": "High",
+      "owner": "Email",
+      "effort": "Medium",
+      "confidence": "High"
+    },
+    {
+      "id": "65ccb2cef65c",
+      "domain": "cybersecuritypilot.org",
+      "category": "Website",
+      "baselineObservation": false,
+      "title": "HSTS header is missing",
+      "summary": "cybersecuritypilot.org does not publish the strict-transport-security header.",
+      "impact": "Missing HSTS can reduce browser-side protection for visitors.",
+      "recommendation": "Add a strict-transport-security header at the web server, CDN, or hosting layer.",
+      "severity": "High",
+      "owner": "Website",
+      "effort": "Low",
+      "confidence": "High"
+    },
+    {
+      "id": "d8d45f74a50d",
+      "domain": "cybersecuritypilot.org",
+      "category": "Email",
+      "baselineObservation": false,
+      "title": "SPF record is missing",
+      "summary": "cybersecuritypilot.org does not publish an SPF record.",
+      "impact": "Attackers may have an easier time spoofing mail from this domain.",
+      "recommendation": "Publish a TXT record beginning with v=spf1 that includes authorized mail senders.",
+      "severity": "High",
+      "owner": "Email",
+      "effort": "Medium",
+      "confidence": "High"
+    },
+    {
+      "id": "1e117f00b0b5",
+      "domain": "cybersecuritypilot.org",
+      "category": "Website",
+      "baselineObservation": false,
+      "title": "Referrer-Policy header is missing",
+      "summary": "cybersecuritypilot.org does not publish the referrer-policy header.",
+      "impact": "Missing Referrer-Policy can reduce browser-side protection for visitors.",
+      "recommendation": "Add a referrer-policy header at the web server, CDN, or hosting layer.",
+      "severity": "Medium",
+      "owner": "Website",
+      "effort": "Low",
+      "confidence": "High"
+    },
+    {
+      "id": "2a89b4319f41",
+      "domain": "cybersecuritypilot.org",
+      "category": "Vendor",
+      "baselineObservation": false,
+      "title": "Unknown third-party vendor observed",
+      "summary": "cybersecuritypilot.org loads content from cdn.tailwindcss.com, which is not categorized yet.",
+      "impact": "Unreviewed third-party scripts or assets can introduce availability, privacy, or security risk.",
+      "recommendation": "Validate the vendor purpose and categorize it as approved or remove it if unnecessary.",
+      "severity": "Medium",
+      "owner": "Vendor",
+      "effort": "Low",
+      "confidence": "Medium"
+    },
+    {
+      "id": "a61d69a450a9",
+      "domain": "cybersecuritypilot.org",
+      "category": "Vendor",
+      "baselineObservation": false,
+      "title": "Unknown third-party vendor observed",
+      "summary": "cybersecuritypilot.org loads content from techmore.github.io, which is not categorized yet.",
+      "impact": "Unreviewed third-party scripts or assets can introduce availability, privacy, or security risk.",
+      "recommendation": "Validate the vendor purpose and categorize it as approved or remove it if unnecessary.",
+      "severity": "Medium",
+      "owner": "Vendor",
+      "effort": "Low",
+      "confidence": "Medium"
+    },
+    {
+      "id": "0b2da65658db",
+      "domain": "cybersecuritypilot.org",
+      "category": "Vendor",
+      "baselineObservation": false,
+      "title": "Unknown third-party vendor observed",
+      "summary": "cybersecuritypilot.org loads content from techmore.github.io, which is not categorized yet.",
+      "impact": "Unreviewed third-party scripts or assets can introduce availability, privacy, or security risk.",
+      "recommendation": "Validate the vendor purpose and categorize it as approved or remove it if unnecessary.",
+      "severity": "Medium",
+      "owner": "Vendor",
+      "effort": "Low",
+      "confidence": "Medium"
+    },
+    {
+      "id": "494a65d3913f",
+      "domain": "cybersecuritypilot.org",
+      "category": "Website",
+      "baselineObservation": false,
+      "title": "XCTO header is missing",
+      "summary": "cybersecuritypilot.org does not publish the x-content-type-options header.",
+      "impact": "Missing XCTO can reduce browser-side protection for visitors.",
+      "recommendation": "Add a x-content-type-options header at the web server, CDN, or hosting layer.",
+      "severity": "Medium",
+      "owner": "Website",
+      "effort": "Low",
+      "confidence": "High"
+    },
+    {
+      "id": "8c955274cc70",
+      "domain": "cybersecuritypilot.org",
+      "category": "Website",
+      "baselineObservation": false,
+      "title": "XFO header is missing",
+      "summary": "cybersecuritypilot.org does not publish the x-frame-options header.",
+      "impact": "Missing XFO can reduce browser-side protection for visitors.",
+      "recommendation": "Add a x-frame-options header at the web server, CDN, or hosting layer.",
+      "severity": "Medium",
+      "owner": "Website",
+      "effort": "Low",
+      "confidence": "High"
+    },
+    {
+      "id": "a7160675f47b",
+      "domain": "cybersecuritypilot.org",
+      "category": "Hosting",
+      "baselineObservation": false,
+      "title": "server header is exposed",
+      "summary": "cybersecuritypilot.org exposes server: GitHub.com.",
+      "impact": "Technology disclosure can help attackers fingerprint hosting or application components.",
+      "recommendation": "Review whether the server header is needed and remove or reduce it when possible.",
+      "severity": "Low",
+      "owner": "Hosting",
+      "effort": "Low",
+      "confidence": "Medium"
+    },
+    {
+      "id": "4a4527c1b6de",
+      "domain": "cybersecuritypilot.org",
+      "category": "Hosting",
+      "baselineObservation": false,
+      "title": "via header is exposed",
+      "summary": "cybersecuritypilot.org exposes via: 1.1 varnish.",
+      "impact": "Technology disclosure can help attackers fingerprint hosting or application components.",
+      "recommendation": "Review whether the via header is needed and remove or reduce it when possible.",
+      "severity": "Low",
+      "owner": "Hosting",
+      "effort": "Low",
+      "confidence": "Medium"
+    }
+  ],
+  "remediation": [
+    {
+      "id": "147068059301",
+      "domain": "cybersecuritypilot.org",
+      "task": "Add a content-security-policy header at the web server, CDN, or hosting layer.",
+      "sourceFinding": "45a1d648f6f1",
+      "severity": "High",
+      "owner": "Website",
+      "effort": "Low"
+    },
+    {
+      "id": "1d45e6a52daa",
+      "domain": "cybersecuritypilot.org",
+      "task": "Publish a _dmarc TXT record, starting with p=none for monitoring and moving toward quarantine or reject.",
+      "sourceFinding": "fa0a3e943fc7",
+      "severity": "High",
+      "owner": "Email",
+      "effort": "Medium"
+    },
+    {
+      "id": "9a7c7ad6d818",
+      "domain": "cybersecuritypilot.org",
+      "task": "Add SPF and DMARC records, then validate them with a follow-up scan.",
+      "sourceFinding": "9121d4d0df7c",
+      "severity": "High",
+      "owner": "Email",
+      "effort": "Medium"
+    },
+    {
+      "id": "f7f4e21faed8",
+      "domain": "cybersecuritypilot.org",
+      "task": "Add a strict-transport-security header at the web server, CDN, or hosting layer.",
+      "sourceFinding": "65ccb2cef65c",
+      "severity": "High",
+      "owner": "Website",
+      "effort": "Low"
+    },
+    {
+      "id": "6b9156644ff9",
+      "domain": "cybersecuritypilot.org",
+      "task": "Publish a TXT record beginning with v=spf1 that includes authorized mail senders.",
+      "sourceFinding": "d8d45f74a50d",
+      "severity": "High",
+      "owner": "Email",
+      "effort": "Medium"
+    },
+    {
+      "id": "a1f881ad1ea2",
+      "domain": "cybersecuritypilot.org",
+      "task": "Add a referrer-policy header at the web server, CDN, or hosting layer.",
+      "sourceFinding": "1e117f00b0b5",
+      "severity": "Medium",
+      "owner": "Website",
+      "effort": "Low"
+    },
+    {
+      "id": "6fda7fe2301f",
+      "domain": "cybersecuritypilot.org",
+      "task": "Validate the vendor purpose and categorize it as approved or remove it if unnecessary.",
+      "sourceFinding": "2a89b4319f41",
+      "severity": "Medium",
+      "owner": "Vendor",
+      "effort": "Low"
+    },
+    {
+      "id": "d9d19edacab3",
+      "domain": "cybersecuritypilot.org",
+      "task": "Validate the vendor purpose and categorize it as approved or remove it if unnecessary.",
+      "sourceFinding": "a61d69a450a9",
+      "severity": "Medium",
+      "owner": "Vendor",
+      "effort": "Low"
+    },
+    {
+      "id": "0db47ac6a1e8",
+      "domain": "cybersecuritypilot.org",
+      "task": "Validate the vendor purpose and categorize it as approved or remove it if unnecessary.",
+      "sourceFinding": "0b2da65658db",
+      "severity": "Medium",
+      "owner": "Vendor",
+      "effort": "Low"
+    },
+    {
+      "id": "c48b3ab11210",
+      "domain": "cybersecuritypilot.org",
+      "task": "Add a x-content-type-options header at the web server, CDN, or hosting layer.",
+      "sourceFinding": "494a65d3913f",
+      "severity": "Medium",
+      "owner": "Website",
+      "effort": "Low"
+    },
+    {
+      "id": "1c284c5312e5",
+      "domain": "cybersecuritypilot.org",
+      "task": "Add a x-frame-options header at the web server, CDN, or hosting layer.",
+      "sourceFinding": "8c955274cc70",
+      "severity": "Medium",
+      "owner": "Website",
+      "effort": "Low"
+    },
+    {
+      "id": "e78cbf240ee5",
+      "domain": "cybersecuritypilot.org",
+      "task": "Review whether the server header is needed and remove or reduce it when possible.",
+      "sourceFinding": "a7160675f47b",
+      "severity": "Low",
+      "owner": "Hosting",
+      "effort": "Low"
+    },
+    {
+      "id": "d60740c7033d",
+      "domain": "cybersecuritypilot.org",
+      "task": "Review whether the via header is needed and remove or reduce it when possible.",
+      "sourceFinding": "4a4527c1b6de",
+      "severity": "Low",
+      "owner": "Hosting",
+      "effort": "Low"
+    }
+  ]
+}

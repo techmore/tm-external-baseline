@@ -3,7 +3,8 @@
 __pycache__/
 *.pyc
 domain_reports/external_domain_history.json
+domain_reports/alert_state.json
 domain_reports/external_domain_baseline_*.html
-!domain_reports/external_domain_baseline_20260501_030538.html
+!domain_reports/external_domain_baseline_20260505_024723.html
 domain_reports/weekly_summary_*.md
 !domain_reports/weekly_summary_20260501.md

@@ -101,15 +101,18 @@ Alerts are sent only when high-priority findings or changes are present.
 ## Outputs
 
 - `domain_reports/latest_summary.json`
+- `domain_reports/public_summary.json`
 - `domain_reports/external_domain_baseline_*.html`
 - `domain_reports/external_domain_history.json`
 - `index.html` and `dashboard/index.html`
 
 The first scan establishes a baseline. Later scans highlight changes.
 
+`latest_summary.json` and timestamped HTML reports contain raw technical evidence. Use `public_summary.json` for safer publishing when you do not want to expose DNS evidence, discovered public emails, Nikto output, or raw headers.
+
 ## Optional System Tools
 
-The scanner works with Python alone, but fuller reports use:
+The scanner installs `dnspython` for DNS lookups. If `dig` is available, it will use `dig`; otherwise it falls back to Python DNS resolution. Fuller reports can also use:
 
 - `dig` for DNS records
 - `nikto` for web exposure checks
@@ -130,4 +133,6 @@ sudo apt-get install -y dnsutils nikto nmap
 
 ## GitHub Pages
 
-This repository includes a root `index.html`, so GitHub Pages can serve the dashboard directly. Commit `domain_reports/latest_summary.json` when you want the hosted page to show the latest public demo data.
+This repository includes a root `index.html`, so GitHub Pages can serve the dashboard directly.
+
+Do not publish customer `latest_summary.json` or timestamped HTML reports unless the customer explicitly wants that evidence public. Those files can contain raw DNS data, public email discoveries, vendors, headers, and Nikto output. Prefer publishing `domain_reports/public_summary.json` or a purpose-built demo dataset.

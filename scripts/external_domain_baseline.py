@@ -33,6 +33,12 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
 
+try:
+    import dns.resolver
+    import dns.exception
+except ImportError:  # pragma: no cover - handled at runtime for clearer user output.
+    dns = None
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DOMAINS_PATH = ROOT / "domains.txt"
@@ -40,6 +46,8 @@ CONFIG_PATH = ROOT / "scripts" / "config" / "domains.json"
 REPORTS_DIR = ROOT / "domain_reports"
 HISTORY_PATH = REPORTS_DIR / "external_domain_history.json"
 SUMMARY_PATH = REPORTS_DIR / "latest_summary.json"
+ALERT_STATE_PATH = REPORTS_DIR / "alert_state.json"
+PUBLIC_SUMMARY_PATH = REPORTS_DIR / "public_summary.json"
 
 DNS_TYPES = ("A", "AAAA", "MX", "NS", "TXT", "CAA")
 SECURITY_HEADERS = {
@@ -80,6 +88,15 @@ class FetchResult:
     error: str | None = None
 
 
+@dataclass
+class CommandResult:
+    returncode: int
+    stdout: str
+    stderr: str = ""
+    timed_out: bool = False
+    error: str | None = None
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -108,23 +125,43 @@ def load_domains(path: Path) -> list[str]:
     return normalize_domains(data.get("domains", []))
 
 
-def run_command(command: list[str], timeout: int = 10) -> tuple[int, str]:
+def run_command(command: list[str], timeout: int = 10) -> CommandResult:
     try:
         result = subprocess.run(command, capture_output=True, text=True, timeout=timeout, check=False)
-        return result.returncode, result.stdout.strip()
-    except (OSError, subprocess.TimeoutExpired) as exc:
-        return 1, str(exc)
+        return CommandResult(result.returncode, result.stdout.strip(), result.stderr.strip())
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout.decode("utf-8", errors="replace") if isinstance(exc.stdout, bytes) else (exc.stdout or "")
+        stderr = exc.stderr.decode("utf-8", errors="replace") if isinstance(exc.stderr, bytes) else (exc.stderr or "")
+        return CommandResult(124, stdout.strip(), stderr.strip(), True, f"Command timed out after {timeout}s")
+    except OSError as exc:
+        return CommandResult(127, "", "", False, str(exc))
+
+
+def dig_available() -> bool:
+    return run_command(["which", "dig"], timeout=3).returncode == 0
+
+
+def resolve_with_dnspython(name: str, record_type: str) -> list[str]:
+    if dns is None:
+        return []
+    try:
+        answers = dns.resolver.resolve(name, record_type, lifetime=10)
+        return sorted({str(answer).strip() for answer in answers})
+    except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers, dns.exception.Timeout):
+        return []
 
 
 def collect_dns(domain: str) -> dict[str, list[str]]:
     records: dict[str, list[str]] = {}
-    dig_available = run_command(["which", "dig"], timeout=3)[0] == 0
+    has_dig = dig_available()
     for record_type in DNS_TYPES:
         values: list[str] = []
-        if dig_available:
-            code, output = run_command(["dig", "+short", record_type, domain], timeout=10)
-            if code == 0 and output:
-                values = sorted({line.strip() for line in output.splitlines() if line.strip()})
+        if has_dig:
+            result = run_command(["dig", "+short", record_type, domain], timeout=10)
+            if result.returncode == 0 and result.stdout:
+                values = sorted({line.strip() for line in result.stdout.splitlines() if line.strip()})
+        elif dns is not None:
+            values = resolve_with_dnspython(domain, record_type)
         elif record_type in {"A", "AAAA"}:
             try:
                 infos = socket.getaddrinfo(domain, None)
@@ -136,10 +173,15 @@ def collect_dns(domain: str) -> dict[str, list[str]]:
 
 
 def resolve_txt(name: str) -> list[str]:
-    code, output = run_command(["dig", "+short", "TXT", name], timeout=10)
-    if code != 0 or not output:
+    if dig_available():
+        result = run_command(["dig", "+short", "TXT", name], timeout=10)
+        if result.returncode != 0 or not result.stdout:
+            return []
+        return sorted({line.strip().replace('" "', "") for line in result.stdout.splitlines() if line.strip()})
+    records = resolve_with_dnspython(name, "TXT")
+    if not records:
         return []
-    return sorted({line.strip().replace('" "', "") for line in output.splitlines() if line.strip()})
+    return sorted({record.replace('" "', "").strip() for record in records})
 
 
 def collect_ssl(domain: str) -> dict[str, Any]:
@@ -254,24 +296,35 @@ def analyze_security_headers(headers: dict[str, str]) -> dict[str, Any]:
 
 
 def run_nikto(domain: str, timeout: int = 90) -> dict[str, Any]:
-    if run_command(["which", "nikto"], timeout=3)[0] != 0:
+    if run_command(["which", "nikto"], timeout=3).returncode != 0:
         return {"available": False, "status": "not_installed", "findings": [], "raw": ""}
 
     command = ["nikto", "-h", f"https://{domain}", "-nointeractive", "-ask", "no"]
-    code, output = run_command(command, timeout=timeout)
+    result = run_command(command, timeout=timeout)
     findings = []
-    for line in output.splitlines():
+    for line in result.stdout.splitlines():
         clean = line.strip()
         if clean.startswith("+"):
             findings.append(clean.lstrip("+ ").strip())
+    if result.timed_out:
+        return {
+            "available": True,
+            "status": "timeout",
+            "exitCode": result.returncode,
+            "findings": findings[:40],
+            "findingCount": len(findings),
+            "raw": result.stdout[-8000:],
+            "error": result.error,
+        }
 
     return {
         "available": True,
-        "status": "completed" if code in (0, 1) else "error",
-        "exitCode": code,
+        "status": "completed" if result.returncode in (0, 1) else "error",
+        "exitCode": result.returncode,
         "findings": findings[:40],
         "findingCount": len(findings),
-        "raw": output[-8000:],
+        "raw": (result.stdout or result.stderr)[-8000:],
+        "error": result.error or (result.stderr if result.returncode not in (0, 1) else None),
     }
 
 
@@ -1004,6 +1057,17 @@ def write_html_report(summary: dict[str, Any], report_path: Path) -> None:
 """)
 
 
+def load_alert_state() -> dict[str, Any]:
+    if ALERT_STATE_PATH.exists():
+        with ALERT_STATE_PATH.open() as fh:
+            return json.load(fh)
+    return {"sentItemIds": []}
+
+
+def save_alert_state(item_ids: list[str]) -> None:
+    ALERT_STATE_PATH.write_text(json.dumps({"timestamp": utc_now(), "sentItemIds": sorted(set(item_ids))}, indent=2))
+
+
 def send_watch_alerts(summary: dict[str, Any], report_name: str) -> None:
     high_items = [
         finding for finding in summary.get("findings", [])
@@ -1013,7 +1077,10 @@ def send_watch_alerts(summary: dict[str, Any], report_name: str) -> None:
         change for change in summary.get("changes", [])
         if change.get("severity") in {"Critical", "High"}
     ])
-    if not high_items:
+    state = load_alert_state()
+    sent_ids = set(state.get("sentItemIds", []))
+    new_items = [item for item in high_items if item.get("id") and item["id"] not in sent_ids]
+    if not new_items:
         return
 
     lines = [
@@ -1023,7 +1090,7 @@ def send_watch_alerts(summary: dict[str, Any], report_name: str) -> None:
         "",
         "High priority items:",
     ]
-    for item in high_items[:10]:
+    for item in new_items[:10]:
         title = item.get("title") or f"{item.get('domain')} {item.get('type')}"
         lines.append(f"- {title}")
     message = "\n".join(lines)
@@ -1053,6 +1120,53 @@ def send_watch_alerts(summary: dict[str, Any], report_name: str) -> None:
                 smtp.send_message(email)
         except (OSError, smtplib.SMTPException) as exc:
             print(f"Email alert failed: {exc}", file=sys.stderr)
+    save_alert_state([*sent_ids, *[item["id"] for item in new_items if item.get("id")]])
+
+
+def sanitize_summary(summary: dict[str, Any]) -> dict[str, Any]:
+    safe = {
+        "timestamp": summary.get("timestamp"),
+        "mode": summary.get("mode"),
+        "isFirstRun": summary.get("isFirstRun"),
+        "baselineMessage": summary.get("baselineMessage"),
+        "totalDomains": summary.get("totalDomains"),
+        "averageSecurityScore": summary.get("averageSecurityScore"),
+        "contentChanges": summary.get("contentChanges"),
+        "dnsChanges": summary.get("dnsChanges"),
+        "newVendors": summary.get("newVendors"),
+        "scorecard": summary.get("scorecard", []),
+        "vendorTypes": summary.get("vendorTypes", {}),
+        "securityHeaders": summary.get("securityHeaders", {}),
+        "recentReports": summary.get("recentReports", []),
+        "sites": [
+            {
+                "domain": site.get("domain"),
+                "status": site.get("status"),
+                "dnsChanges": site.get("dnsChanges"),
+                "vendorCount": site.get("vendorCount"),
+            }
+            for site in summary.get("sites", [])
+        ],
+        "findings": [
+            {
+                key: finding.get(key)
+                for key in ("id", "domain", "category", "baselineObservation", "title", "summary", "impact", "recommendation", "severity", "owner", "effort", "confidence")
+            }
+            for finding in summary.get("findings", [])
+        ],
+        "remediation": [
+            {
+                key: task.get(key)
+                for key in ("id", "domain", "task", "sourceFinding", "severity", "owner", "effort")
+            }
+            for task in summary.get("remediation", [])
+        ],
+    }
+    return safe
+
+
+def write_public_summary(summary: dict[str, Any]) -> None:
+    PUBLIC_SUMMARY_PATH.write_text(json.dumps(sanitize_summary(summary), indent=2))
 
 
 def analyze_domain(domain: str, skip_nikto: bool = False) -> dict[str, Any]:
@@ -1101,6 +1215,7 @@ def main() -> int:
 
     SUMMARY_PATH.write_text(json.dumps(summary, indent=2))
     write_html_report(summary, REPORTS_DIR / report_name)
+    write_public_summary(summary)
     send_watch_alerts(summary, report_name)
     save_history(current)
     print(f"Wrote {SUMMARY_PATH}")

@@ -1,2 +1,1 @@
-# The scanner uses the Python standard library by default.
-# Keep this file for future integrations and consistent install workflows.
+dnspython>=2.6.1,<3

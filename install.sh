@@ -23,7 +23,7 @@ if [[ -s requirements.txt ]]; then
 fi
 
 missing_tools=()
-for tool in dig nikto nmap; do
+for tool in nikto nmap; do
   if ! command -v "$tool" >/dev/null 2>&1; then
     missing_tools+=("$tool")
   fi
@@ -32,14 +32,20 @@ done
 if (( ${#missing_tools[@]} > 0 )); then
   echo "Optional system tools missing: ${missing_tools[*]}"
   if command -v brew >/dev/null 2>&1; then
-    echo "On macOS, install them with: brew install bind nikto nmap"
+    echo "On macOS, install them with: brew install nikto nmap"
   elif command -v apt-get >/dev/null 2>&1; then
-    echo "On Debian/Ubuntu, install them with: sudo apt-get update && sudo apt-get install -y dnsutils nikto nmap"
+    echo "On Debian/Ubuntu, install them with: sudo apt-get update && sudo apt-get install -y nikto nmap"
   else
-    echo "Install dig, nikto, and nmap with your OS package manager for full reports."
+    echo "Install nikto and nmap with your OS package manager for full reports."
   fi
 else
-  echo "Found dig, nikto, and nmap."
+  echo "Found nikto and nmap."
+fi
+
+if command -v dig >/dev/null 2>&1; then
+  echo "Found dig for DNS lookups."
+else
+  echo "dig not found; DNS lookups will use dnspython fallback."
 fi
 
 if [[ ! -f domains.txt ]]; then

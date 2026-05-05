@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-01T03:05:38Z",
+  "timestamp": "2026-05-05T02:47:23Z",
   "mode": "monitoring",
   "isFirstRun": false,
   "baselineMessage": "",
@@ -698,95 +698,95 @@
       "domain": "cybersecuritypilot.org",
       "type": "A",
       "value": "185.199.108.153",
-      "lastChange": "2026-05-01T03:05:37Z"
+      "lastChange": "2026-05-05T02:47:23Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "A",
       "value": "185.199.109.153",
-      "lastChange": "2026-05-01T03:05:37Z"
+      "lastChange": "2026-05-05T02:47:23Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "A",
       "value": "185.199.110.153",
-      "lastChange": "2026-05-01T03:05:37Z"
+      "lastChange": "2026-05-05T02:47:23Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "A",
       "value": "185.199.111.153",
-      "lastChange": "2026-05-01T03:05:37Z"
+      "lastChange": "2026-05-05T02:47:23Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "MX",
       "value": "1 smtp.google.com.",
-      "lastChange": "2026-05-01T03:05:37Z"
+      "lastChange": "2026-05-05T02:47:23Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "NS",
       "value": "ns1.hover.com.",
-      "lastChange": "2026-05-01T03:05:37Z"
+      "lastChange": "2026-05-05T02:47:23Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "NS",
       "value": "ns2.hover.com.",
-      "lastChange": "2026-05-01T03:05:37Z"
+      "lastChange": "2026-05-05T02:47:23Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "TXT",
       "value": "\"CSP-verification-a88fbb45fe6aec95d98c16e7872475515611af44a9267eb2c89c6b49891efcf6\"",
-      "lastChange": "2026-05-01T03:05:37Z"
+      "lastChange": "2026-05-05T02:47:23Z"
     },
     {
       "domain": "cybersecuritypilot.org",
       "type": "TXT",
       "value": "\"google-site-verification=-F7YSQ9ZuWrJxLZM95edc8mIYfxp6YwTq87QR90RgRE\"",
-      "lastChange": "2026-05-01T03:05:37Z"
+      "lastChange": "2026-05-05T02:47:23Z"
     }
   ],
   "vendors": [
     {
       "name": "unpkg.com",
       "type": "CDN",
-      "firstSeen": "2026-05-01T03:05:38Z",
-      "lastChange": "2026-05-01T03:05:38Z",
+      "firstSeen": "2026-05-05T02:47:23Z",
+      "lastChange": "2026-05-05T02:47:23Z",
       "status": "observed",
       "siteCount": 1
     },
     {
       "name": "fonts.googleapis.com",
       "type": "Fonts",
-      "firstSeen": "2026-05-01T03:05:38Z",
-      "lastChange": "2026-05-01T03:05:38Z",
+      "firstSeen": "2026-05-05T02:47:23Z",
+      "lastChange": "2026-05-05T02:47:23Z",
       "status": "observed",
       "siteCount": 1
     },
     {
       "name": "fonts.gstatic.com",
       "type": "Fonts",
-      "firstSeen": "2026-05-01T03:05:38Z",
-      "lastChange": "2026-05-01T03:05:38Z",
+      "firstSeen": "2026-05-05T02:47:23Z",
+      "lastChange": "2026-05-05T02:47:23Z",
       "status": "observed",
       "siteCount": 1
     },
     {
       "name": "cdn.tailwindcss.com",
       "type": "Unknown",
-      "firstSeen": "2026-05-01T03:05:38Z",
-      "lastChange": "2026-05-01T03:05:38Z",
+      "firstSeen": "2026-05-05T02:47:23Z",
+      "lastChange": "2026-05-05T02:47:23Z",
       "status": "observed",
       "siteCount": 1
     },
     {
       "name": "techmore.github.io",
       "type": "Unknown",
-      "firstSeen": "2026-05-01T03:05:38Z",
-      "lastChange": "2026-05-01T03:05:38Z",
+      "firstSeen": "2026-05-05T02:47:23Z",
+      "lastChange": "2026-05-05T02:47:23Z",
       "status": "observed",
       "siteCount": 1
     }
@@ -794,11 +794,11 @@
   "sites": [
     {
       "domain": "cybersecuritypilot.org",
-      "lastChange": "2026-05-01T03:05:37Z",
+      "lastChange": "2026-05-05T02:47:23Z",
       "dnsChanges": 0,
       "vendorCount": 7,
       "status": 200,
-      "reportFile": "external_domain_baseline_20260501_030538.html"
+      "reportFile": "external_domain_baseline_20260505_024723.html"
     }
   ],
   "sections": [
@@ -981,7 +981,7 @@
   ],
   "domains": {
     "cybersecuritypilot.org": {
-      "timestamp": "2026-05-01T03:05:37Z",
+      "timestamp": "2026-05-05T02:47:23Z",
       "dns": {
         "A": [
           "185.199.108.153",
@@ -1009,26 +1009,26 @@
         "error": null,
         "headers": {
           "connection": "close",
-          "content-length": "21945",
+          "content-length": "22643",
           "server": "GitHub.com",
           "content-type": "text/html; charset=utf-8",
-          "last-modified": "Fri, 01 May 2026 02:47:50 GMT",
+          "last-modified": "Tue, 05 May 2026 01:25:23 GMT",
           "access-control-allow-origin": "*",
-          "etag": "\"69f41456-55b9\"",
-          "expires": "Fri, 01 May 2026 03:01:11 GMT",
+          "etag": "\"69f94703-5873\"",
+          "expires": "Tue, 05 May 2026 02:57:23 GMT",
           "cache-control": "max-age=600",
           "x-proxy-cache": "MISS",
-          "x-github-request-id": "2C5C:206406:B9537:CC56D:69F4151E",
+          "x-github-request-id": "35F4:7099C:E5158C:100BFF0:69F95A3A",
           "accept-ranges": "bytes",
           "age": "0",
-          "date": "Fri, 01 May 2026 03:05:37 GMT",
+          "date": "Tue, 05 May 2026 02:47:23 GMT",
           "via": "1.1 varnish",
-          "x-served-by": "cache-ewr-kewr1740041-EWR",
-          "x-cache": "HIT",
+          "x-served-by": "cache-ewr-kewr1740058-EWR",
+          "x-cache": "MISS",
           "x-cache-hits": "0",
-          "x-timer": "S1777604738.666695,VS0,VE18",
+          "x-timer": "S1777949243.204189,VS0,VE29",
           "vary": "Accept-Encoding",
-          "x-fastly-request-id": "d32cf8dbb3cd185b2832efc031f6cbf14c064f62"
+          "x-fastly-request-id": "95322253b395ad4b1a905247be2335bf0cc4b7a0"
         },
         "securityHeaders": {
           "HSTS": null,
@@ -1278,9 +1278,9 @@
   },
   "recentReports": [
     {
-      "date": "2026-05-01T03:05:38Z",
+      "date": "2026-05-05T02:47:23Z",
       "domains": 1,
-      "url": "external_domain_baseline_20260501_030538.html"
+      "url": "external_domain_baseline_20260505_024723.html"
     }
   ]
 }
